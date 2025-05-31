@@ -1,11 +1,33 @@
 import { Background, Panel, ReactFlow } from "@xyflow/react";
 import { useStore } from "./store";
 import { shallow } from "zustand/shallow";
-import { useCallback, memo } from "react";
+import { useCallback, memo, useMemo } from "react";
 import Osc from "./nodes/Osc";
 import Out from "./nodes/Out";
 import Amp from "./nodes/Amp";
 
+// Memoized node types
+const nodeTypes = {
+  osc: Osc,
+  amp: Amp,
+  out: Out,
+};
+
+// Memoized button component with proper prop types
+const AddNodeButton = memo(({ label, onClick }) => (
+  <button
+    className="px-2 py-1 rounded bg-white shadow hover:bg-gray-50 transition-colors"
+    onClick={onClick}
+    aria-label={`Add ${label} node`}
+    title={`Add ${label} node`}
+  >
+    {label}
+  </button>
+));
+
+AddNodeButton.displayName = "AddNodeButton";
+
+// Memoized selector to prevent unnecessary re-renders
 const selector = (store) => ({
   nodes: store.nodes,
   edges: store.edges,
@@ -17,42 +39,34 @@ const selector = (store) => ({
   createNode: store.createNode,
 });
 
-const nodeTypes = {
-  osc: Osc,
-  amp: Amp,
-  out: Out,
-};
-
-// Memoized button component
-const AddNodeButton = memo(({ label, onClick }) => (
-  <button
-    className="px-2 py-1 rounded bg-white shadow hover:bg-gray-50 transition-colors"
-    onClick={onClick}
-  >
-    {label}
-  </button>
-));
-
-AddNodeButton.displayName = "AddNodeButton";
-
 export default function App() {
   const store = useStore(selector, shallow);
 
+  // Memoized event handlers
   const handleAddOsc = useCallback(() => store.createNode("osc"), [store]);
   const handleAddAmp = useCallback(() => store.createNode("amp"), [store]);
 
+  // Memoized ReactFlow props
+  const flowProps = useMemo(
+    () => ({
+      nodes: store.nodes,
+      edges: store.edges,
+      nodeTypes,
+      onNodesChange: store.onNodesChange,
+      onEdgesChange: store.onEdgesChange,
+      onConnect: store.addEdge,
+      onNodesDelete: store.onNodesDelete,
+      onEdgesDelete: store.onEdgesDelete,
+      fitView: true,
+      minZoom: 0.1,
+      maxZoom: 2,
+      defaultViewport: { x: 0, y: 0, zoom: 1 },
+    }),
+    [store]
+  );
+
   return (
-    <ReactFlow
-      nodes={store.nodes}
-      edges={store.edges}
-      nodeTypes={nodeTypes}
-      onNodesChange={store.onNodesChange}
-      onEdgesChange={store.onEdgesChange}
-      onConnect={store.addEdge}
-      onNodesDelete={store.onNodesDelete}
-      onEdgesDelete={store.onEdgesDelete}
-      fitView
-    >
+    <ReactFlow {...flowProps}>
       <Panel className="space-x-4" position="top-right">
         <AddNodeButton label="Add Osc" onClick={handleAddOsc} />
         <AddNodeButton label="Add Amp" onClick={handleAddAmp} />

@@ -12,7 +12,8 @@ import {
   createAudioNode,
 } from "./audio";
 
-export const useStore = createWithEqualityFn((set, get) => ({
+// Initial state
+const initialState = {
   nodes: [
     {
       id: "a",
@@ -30,79 +31,78 @@ export const useStore = createWithEqualityFn((set, get) => ({
   ],
   edges: [],
   isRunning: isRunning(),
+};
 
-  toggleAudio() {
-    toggleAudio().then(() => {
-      set({ isRunning: isRunning() });
-    });
+// Node type configurations
+const nodeConfigs = {
+  osc: {
+    defaultData: { frequency: 440, type: "sine" },
+    defaultPosition: { x: 0, y: 0 },
+  },
+  amp: {
+    defaultData: { gain: 0.5 },
+    defaultPosition: { x: 0, y: 0 },
+  },
+};
+
+export const useStore = createWithEqualityFn((set, get) => ({
+  ...initialState,
+
+  toggleAudio: async () => {
+    await toggleAudio();
+    set({ isRunning: isRunning() });
   },
 
-  onNodesChange(changes) {
+  onNodesChange: (changes) => {
     set({
       nodes: applyNodeChanges(changes, get().nodes),
     });
   },
 
-  updateNode(id, data) {
+  updateNode: (id, data) => {
     updateAudioNode(id, data);
-    set({
-      nodes: get().nodes.map((node) =>
-        node.id === id
-          ? { ...node, data: Object.assign(node.data, data) }
-          : node
+    set((state) => ({
+      nodes: state.nodes.map((node) =>
+        node.id === id ? { ...node, data: { ...node.data, ...data } } : node
       ),
-    });
+    }));
   },
 
-  onNodesDelete(deleted) {
-    for (const { id } of deleted) {
-      removeAudioNode(id);
-    }
+  onNodesDelete: (deleted) => {
+    deleted.forEach(({ id }) => removeAudioNode(id));
   },
 
-  onEdgesChange(changes) {
+  onEdgesChange: (changes) => {
     set({
       edges: applyEdgeChanges(changes, get().edges),
     });
   },
 
-  addEdge(data) {
+  addEdge: (data) => {
     const id = nanoid(6);
     const edge = { id, ...data };
 
     connect(edge.source, edge.target);
-    set({ edges: [edge, ...get().edges] });
+    set((state) => ({ edges: [edge, ...state.edges] }));
   },
 
-  onEdgesDelete(deleted) {
-    for (const { source, target } of deleted) {
-      disconnect(source, target);
-    }
+  onEdgesDelete: (deleted) => {
+    deleted.forEach(({ source, target }) => disconnect(source, target));
   },
 
-  createNode(type) {
+  createNode: (type) => {
+    const config = nodeConfigs[type];
+    if (!config) return;
+
     const id = nanoid();
+    const { defaultData, defaultPosition } = config;
 
-    switch (type) {
-      case "osc": {
-        const data = { frequency: 440, type: "sine" };
-        const position = { x: 0, y: 0 };
-
-        createAudioNode(id, type, data);
-        set({ nodes: [...get().nodes, { id, type, data, position }] });
-
-        break;
-      }
-
-      case "amp": {
-        const data = { gain: 0.5 };
-        const position = { x: 0, y: 0 };
-
-        createAudioNode(id, type, data);
-        set({ nodes: [...get().nodes, { id, type, data, position }] });
-
-        break;
-      }
-    }
+    createAudioNode(id, type, defaultData);
+    set((state) => ({
+      nodes: [
+        ...state.nodes,
+        { id, type, data: defaultData, position: defaultPosition },
+      ],
+    }));
   },
 }));

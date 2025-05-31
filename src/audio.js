@@ -1,33 +1,57 @@
-const context = new AudioContext();
+// Singleton AudioContext instance
+let context = null;
 const nodes = new Map();
 
-const osc = context.createOscillator();
-osc.frequency.value = 220;
-osc.type = "square";
-osc.start();
+// Lazy initialization of AudioContext
+function getAudioContext() {
+  if (!context) {
+    context = new AudioContext();
+  }
+  return context;
+}
 
-const amp = context.createGain();
-amp.gain.value = 0.5;
+// Initialize default nodes
+function initializeDefaultNodes() {
+  const ctx = getAudioContext();
+  const osc = ctx.createOscillator();
+  osc.frequency.value = 220;
+  osc.type = "square";
+  osc.start();
 
-const out = context.destination;
+  const amp = ctx.createGain();
+  amp.gain.value = 0.5;
 
-nodes.set("a", osc);
-nodes.set("b", amp);
-nodes.set("c", out);
+  const out = ctx.destination;
+
+  nodes.set("a", osc);
+  nodes.set("b", amp);
+  nodes.set("c", out);
+}
+
+// Initialize on first import
+initializeDefaultNodes();
 
 export function isRunning() {
-  return context.state === "running";
+  return getAudioContext().state === "running";
 }
 
 export function toggleAudio() {
-  return isRunning() ? context.suspend() : context.resume();
+  const ctx = getAudioContext();
+  return ctx.state === "running" ? ctx.suspend() : ctx.resume();
 }
 
+// Optimized node update with parameter scheduling
 export function updateAudioNode(id, data) {
   const node = nodes.get(id);
+  if (!node) return;
+
+  const ctx = getAudioContext();
+  const now = ctx.currentTime;
+
   for (const [key, val] of Object.entries(data)) {
     if (node[key] instanceof AudioParam) {
-      node[key].value = val;
+      // Use setValueAtTime for immediate changes
+      node[key].setValueAtTime(val, now);
     } else {
       node[key] = val;
     }
@@ -36,45 +60,74 @@ export function updateAudioNode(id, data) {
 
 export function removeAudioNode(id) {
   const node = nodes.get(id);
+  if (!node) return;
 
-  node.disconnect();
-  node.stop?.();
-
-  nodes.delete(id);
+  try {
+    node.disconnect();
+    if (typeof node.stop === "function") {
+      node.stop();
+    }
+  } catch (error) {
+    console.warn(`Error removing audio node ${id}:`, error);
+  } finally {
+    nodes.delete(id);
+  }
 }
 
 export function connect(sourceId, targetId) {
   const source = nodes.get(sourceId);
   const target = nodes.get(targetId);
 
-  source.connect(target);
+  if (source && target) {
+    try {
+      source.connect(target);
+    } catch (error) {
+      console.warn(`Error connecting nodes ${sourceId} -> ${targetId}:`, error);
+    }
+  }
 }
 
 export function disconnect(sourceId, targetId) {
   const source = nodes.get(sourceId);
   const target = nodes.get(targetId);
 
-  source.disconnect(target);
+  if (source && target) {
+    try {
+      source.disconnect(target);
+    } catch (error) {
+      console.warn(
+        `Error disconnecting nodes ${sourceId} -> ${targetId}:`,
+        error
+      );
+    }
+  }
 }
 
 export function createAudioNode(id, type, data) {
-  switch (type) {
-    case "osc": {
-      const node = context.createOscillator();
-      node.frequency.value = data.frequency;
-      node.type = data.type;
-      node.start();
+  const ctx = getAudioContext();
+  let node;
 
-      nodes.set(id, node);
-      break;
+  try {
+    switch (type) {
+      case "osc": {
+        node = ctx.createOscillator();
+        node.frequency.value = data.frequency;
+        node.type = data.type;
+        node.start();
+        break;
+      }
+      case "amp": {
+        node = ctx.createGain();
+        node.gain.value = data.gain;
+        break;
+      }
+      default:
+        throw new Error(`Unknown node type: ${type}`);
     }
 
-    case "amp": {
-      const node = context.createGain();
-      node.gain.value = data.gain;
-
-      nodes.set(id, node);
-      break;
-    }
+    nodes.set(id, node);
+  } catch (error) {
+    console.error(`Error creating audio node ${type}:`, error);
+    throw error;
   }
 }
