@@ -209,6 +209,38 @@ const PlusIcon = () => (
   </svg>
 );
 
+const UndoIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+    />
+  </svg>
+);
+
+const RedoIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M21 10H11a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"
+    />
+  </svg>
+);
+
 const TrashIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -334,6 +366,12 @@ export const BottomMenu = ({ onAddNode }) => {
   const { currentTheme, toggleTheme } = useTheme();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const clearCanvas = useStore((state) => state.clearCanvas);
+  const undo = useStore((state) => state.undo);
+  const redo = useStore((state) => state.redo);
+  const canUndo = useStore((state) => state.currentHistoryIndex > 0);
+  const canRedo = useStore(
+    (state) => state.currentHistoryIndex < state.history.length - 1
+  );
   const menuRef = useRef(null);
   const dropdownRef = useRef(null);
 
@@ -357,6 +395,37 @@ export const BottomMenu = ({ onAddNode }) => {
     };
   }, [isDropdownOpen]);
 
+  useEffect(() => {
+    const handleKeyboard = (event) => {
+      // Check if the target is an input or textarea
+      if (
+        event.target.tagName === "INPUT" ||
+        event.target.tagName === "TEXTAREA"
+      ) {
+        return;
+      }
+
+      // Handle undo/redo shortcuts
+      if (event.metaKey || event.ctrlKey) {
+        if (event.key === "z" && !event.shiftKey && canUndo) {
+          event.preventDefault();
+          undo();
+        } else if (
+          (event.key === "y" || (event.key === "z" && event.shiftKey)) &&
+          canRedo
+        ) {
+          event.preventDefault();
+          redo();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyboard);
+    return () => {
+      document.removeEventListener("keydown", handleKeyboard);
+    };
+  }, [undo, redo, canUndo, canRedo]);
+
   const handleAddNode = (type) => {
     onAddNode(type);
     setIsDropdownOpen(false);
@@ -373,6 +442,23 @@ export const BottomMenu = ({ onAddNode }) => {
           data-tooltip="Add Node"
         >
           <PlusIcon />
+        </MenuButton>
+        <Divider />
+        <MenuButton
+          onClick={undo}
+          disabled={!canUndo}
+          data-tooltip="Undo (Ctrl/⌘+Z)"
+          style={{ opacity: canUndo ? 1 : 0.5 }}
+        >
+          <UndoIcon />
+        </MenuButton>
+        <MenuButton
+          onClick={redo}
+          disabled={!canRedo}
+          data-tooltip="Redo (Ctrl/⌘+Y)"
+          style={{ opacity: canRedo ? 1 : 0.5 }}
+        >
+          <RedoIcon />
         </MenuButton>
         <Divider />
         <MenuButton onClick={toggleTheme} data-tooltip="Toggle Theme">

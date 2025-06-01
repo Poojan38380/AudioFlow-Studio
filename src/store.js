@@ -31,7 +31,15 @@ const initialState = {
   ],
   edges: [],
   isRunning: isRunning(),
+  history: [],
+  currentHistoryIndex: -1,
 };
+
+// Helper function to create a history entry
+const createHistoryEntry = (nodes, edges) => ({
+  nodes: JSON.parse(JSON.stringify(nodes)),
+  edges: JSON.parse(JSON.stringify(edges)),
+});
 
 // Node type configurations
 const nodeConfigs = {
@@ -68,6 +76,88 @@ const nodeConfigs = {
 export const useStore = createWithEqualityFn((set, get) => ({
   ...initialState,
 
+  // Add history entry
+  addHistoryEntry: () => {
+    const { nodes, edges, history, currentHistoryIndex } = get();
+    const newEntry = createHistoryEntry(nodes, edges);
+
+    // Remove any future history entries if we're in the middle of the stack
+    const newHistory = history.slice(0, currentHistoryIndex + 1);
+
+    set({
+      history: [...newHistory, newEntry],
+      currentHistoryIndex: currentHistoryIndex + 1,
+    });
+  },
+
+  // Undo function
+  undo: () => {
+    const { currentHistoryIndex, history } = get();
+    if (currentHistoryIndex > 0) {
+      const prevState = history[currentHistoryIndex - 1];
+
+      // Stop audio if running
+      if (isRunning()) {
+        toggleAudio();
+      }
+
+      // Remove current audio nodes
+      get().nodes.forEach(({ id }) => removeAudioNode(id));
+
+      // Recreate audio nodes from previous state
+      prevState.nodes.forEach((node) => {
+        if (node.data) {
+          createAudioNode(node.id, node.type, node.data);
+        }
+      });
+
+      // Recreate connections
+      prevState.edges.forEach((edge) => {
+        connect(edge.source, edge.target);
+      });
+
+      set({
+        nodes: prevState.nodes,
+        edges: prevState.edges,
+        currentHistoryIndex: currentHistoryIndex - 1,
+      });
+    }
+  },
+
+  // Redo function
+  redo: () => {
+    const { currentHistoryIndex, history } = get();
+    if (currentHistoryIndex < history.length - 1) {
+      const nextState = history[currentHistoryIndex + 1];
+
+      // Stop audio if running
+      if (isRunning()) {
+        toggleAudio();
+      }
+
+      // Remove current audio nodes
+      get().nodes.forEach(({ id }) => removeAudioNode(id));
+
+      // Recreate audio nodes from next state
+      nextState.nodes.forEach((node) => {
+        if (node.data) {
+          createAudioNode(node.id, node.type, node.data);
+        }
+      });
+
+      // Recreate connections
+      nextState.edges.forEach((edge) => {
+        connect(edge.source, edge.target);
+      });
+
+      set({
+        nodes: nextState.nodes,
+        edges: nextState.edges,
+        currentHistoryIndex: currentHistoryIndex + 1,
+      });
+    }
+  },
+
   toggleAudio: async () => {
     await toggleAudio();
     set({ isRunning: isRunning() });
@@ -81,32 +171,44 @@ export const useStore = createWithEqualityFn((set, get) => ({
     // Remove all audio nodes
     get().nodes.forEach(({ id }) => removeAudioNode(id));
     // Clear state
-    set({ nodes: [], edges: [] });
+    set({
+      nodes: [],
+      edges: [],
+      history: [createHistoryEntry([], [])],
+      currentHistoryIndex: 0,
+    });
   },
 
   onNodesChange: (changes) => {
+    const newNodes = applyNodeChanges(changes, get().nodes);
     set({
-      nodes: applyNodeChanges(changes, get().nodes),
+      nodes: newNodes,
     });
+    get().addHistoryEntry();
   },
 
   updateNode: (id, data) => {
     updateAudioNode(id, data);
-    set((state) => ({
-      nodes: state.nodes.map((node) =>
+    set((state) => {
+      const newNodes = state.nodes.map((node) =>
         node.id === id ? { ...node, data: { ...node.data, ...data } } : node
-      ),
-    }));
+      );
+      return { nodes: newNodes };
+    });
+    get().addHistoryEntry();
   },
 
   onNodesDelete: (deleted) => {
     deleted.forEach(({ id }) => removeAudioNode(id));
+    get().addHistoryEntry();
   },
 
   onEdgesChange: (changes) => {
+    const newEdges = applyEdgeChanges(changes, get().edges);
     set({
-      edges: applyEdgeChanges(changes, get().edges),
+      edges: newEdges,
     });
+    get().addHistoryEntry();
   },
 
   addEdge: (data) => {
@@ -115,10 +217,12 @@ export const useStore = createWithEqualityFn((set, get) => ({
 
     connect(edge.source, edge.target);
     set((state) => ({ edges: [edge, ...state.edges] }));
+    get().addHistoryEntry();
   },
 
   onEdgesDelete: (deleted) => {
     deleted.forEach(({ source, target }) => disconnect(source, target));
+    get().addHistoryEntry();
   },
 
   createNode: (type) => {
@@ -135,5 +239,6 @@ export const useStore = createWithEqualityFn((set, get) => ({
         { id, type, data: defaultData, position: defaultPosition },
       ],
     }));
+    get().addHistoryEntry();
   },
 }));
