@@ -1,8 +1,7 @@
 import React, { useCallback, memo, useRef, useEffect } from "react";
 import { Handle } from "@xyflow/react";
 import { shallow } from "zustand/shallow";
-import { tw } from "twind";
-
+import { BaseNode } from "../components/common";
 import { useStore } from "../store";
 
 // Memoized selector factory
@@ -13,35 +12,12 @@ const createSelector = (id) => (store) => ({
   ),
 });
 
-// Memoized parameter input component
-const ParamInput = memo(({ label, value, onChange, min, max, step }) => (
-  <label className={tw("flex flex-col px-3 py-1.5")}>
-    <div className={tw("flex justify-between items-center mb-1.5")}>
-      <p className={tw("text-xs font-medium text-gray-700")}>{label}</p>
-      <p className={tw("text-xs text-gray-600")}>{value.toFixed(2)}</p>
-    </div>
-    <input
-      className={tw(
-        "nodrag w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer hover:bg-gray-300"
-      )}
-      type="range"
-      min={min}
-      max={max}
-      step={step}
-      value={value}
-      onChange={onChange}
-      aria-label={label}
-    />
-  </label>
-));
-
-ParamInput.displayName = "ParamInput";
-
 const drawNoSignal = (ctx, width, height) => {
-  ctx.fillStyle = "rgb(32, 33, 36)";
+  // Use a darker background for better visibility
+  ctx.fillStyle = "#1a1a1a";
   ctx.fillRect(0, 0, width, height);
   ctx.font = "14px Arial";
-  ctx.fillStyle = "rgb(156, 163, 175)";
+  ctx.fillStyle = "#9ca3af";
   ctx.textAlign = "center";
   ctx.fillText("Waiting for Input", width / 2, height / 2);
 
@@ -49,7 +25,7 @@ const drawNoSignal = (ctx, width, height) => {
   ctx.beginPath();
   ctx.moveTo(0, height / 2);
   ctx.lineTo(width, height / 2);
-  ctx.strokeStyle = "rgb(75, 85, 99)";
+  ctx.strokeStyle = "#4b5563";
   ctx.lineWidth = 1;
   ctx.stroke();
 };
@@ -90,13 +66,14 @@ const Waveform = memo(({ id, data }) => {
         const hasNonZero = dataArray.some((val) => Math.abs(val) > 0.001);
         setHasSignal(hasNonZero);
 
-        canvasCtx.fillStyle = "rgb(32, 33, 36)";
+        // Use a darker background for better visibility
+        canvasCtx.fillStyle = "#1a1a1a";
         canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
         canvasCtx.lineWidth = 2;
         canvasCtx.strokeStyle = hasNonZero
-          ? "rgb(99, 102, 241)"
-          : "rgb(75, 85, 99)";
+          ? "#818cf8" // Indigo color for active signal
+          : "#4b5563"; // Gray color for no signal
         canvasCtx.beginPath();
 
         const sliceWidth = (WIDTH * 1.0) / dataArray.length;
@@ -121,7 +98,7 @@ const Waveform = memo(({ id, data }) => {
         // Draw status text
         if (!hasNonZero) {
           canvasCtx.font = "12px Arial";
-          canvasCtx.fillStyle = "rgb(156, 163, 175)";
+          canvasCtx.fillStyle = "#9ca3af";
           canvasCtx.textAlign = "center";
           canvasCtx.fillText("No Signal", WIDTH / 2, 20);
         }
@@ -140,53 +117,64 @@ const Waveform = memo(({ id, data }) => {
   }, [id, data.zoom]);
 
   return (
-    <div
-      className={tw(
-        "rounded-lg bg-white shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100"
-      )}
-    >
-      <Handle
-        className={tw(
-          "w-3 h-3 bg-blue-500 border-2 border-white rounded-full shadow-sm -top-1.5"
-        )}
-        type="target"
-        position="top"
-        aria-label="Input connection"
-      />
+    <BaseNode type="waveform">
+      <Handle type="target" position="top" />
 
-      <div
-        className={tw(
-          "rounded-t-lg px-3 py-2 bg-gradient-to-r from-gray-700 to-gray-800"
-        )}
-      >
-        <p className={tw("text-sm font-medium text-white")}>
-          Waveform {hasSignal && "●"}
-        </p>
+      <div className="node-header">
+        <h3>Waveform {hasSignal && "●"}</h3>
       </div>
 
-      <div className={tw("p-2 bg-gray-900")}>
-        <canvas
-          ref={canvasRef}
-          width={300}
-          height={150}
-          className={tw("rounded-md bg-gray-800")}
-        />
+      <div className="node-content">
+        <div
+          style={{
+            padding: "8px",
+            background: "#1a1a1a",
+            borderRadius: "6px",
+            marginBottom: "8px",
+          }}
+        >
+          <canvas
+            ref={canvasRef}
+            width={300}
+            height={150}
+            style={{
+              display: "block",
+              width: "100%",
+              height: "100%",
+            }}
+          />
+        </div>
         {error && (
-          <p className={tw("text-xs text-red-500 mt-1 text-center")}>{error}</p>
+          <p
+            style={{
+              color: "#ef4444",
+              fontSize: "12px",
+              textAlign: "center",
+              marginBottom: "8px",
+            }}
+          >
+            {error}
+          </p>
         )}
-      </div>
 
-      <div className={tw("py-2")}>
-        <ParamInput
-          label="Zoom"
-          value={data.zoom || 1}
-          onChange={setZoom}
-          min={0.1}
-          max={5}
-          step={0.1}
-        />
+        <label>
+          <div className="label-text">
+            <span>Zoom</span>
+            <span>{(data.zoom || 1).toFixed(2)}</span>
+          </div>
+          <input
+            className="nodrag"
+            type="range"
+            min={0.1}
+            max={5}
+            step={0.1}
+            value={data.zoom || 1}
+            onChange={setZoom}
+            aria-label="Zoom"
+          />
+        </label>
       </div>
-    </div>
+    </BaseNode>
   );
 });
 

@@ -192,3 +192,155 @@ export const Text = styled.p`
   letter-spacing: ${({ size }) => (size === "sm" ? "0.02em" : "0.01em")};
   margin: 0;
 `;
+
+export const BaseNode = styled.div`
+  background: ${({ theme, type }) => {
+    switch (type) {
+      case "osc":
+      case "noise":
+        return `linear-gradient(45deg, ${theme.colors.nodes.audio}22, transparent)`;
+      case "amp":
+      case "flanger":
+      case "chorus":
+      case "phaser":
+        return `linear-gradient(45deg, ${theme.colors.nodes.effect}22, transparent)`;
+      case "waveform":
+        return `linear-gradient(45deg, ${theme.colors.nodes.input}22, transparent)`;
+      case "out":
+        return `linear-gradient(45deg, ${theme.colors.nodes.output}22, transparent)`;
+      default:
+        return theme.colors.background.secondary;
+    }
+  }};
+  border: 1px solid
+    ${({ theme, type }) => {
+      switch (type) {
+        case "osc":
+        case "noise":
+          return theme.colors.nodes.audio;
+        case "amp":
+        case "flanger":
+        case "chorus":
+        case "phaser":
+          return theme.colors.nodes.effect;
+        case "waveform":
+          return theme.colors.nodes.input;
+        case "out":
+          return theme.colors.nodes.output;
+        default:
+          return theme.colors.background.tertiary;
+      }
+    }};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  padding: ${({ theme }) => theme.spacing.md};
+  min-width: 200px;
+  box-shadow: ${({ theme }) => theme.shadows.sm};
+  transition: all ${({ theme }) => theme.transitions.default};
+
+  &:hover {
+    box-shadow: ${({ theme }) => theme.shadows.md};
+  }
+
+  .node-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: ${({ theme }) => theme.spacing.sm};
+
+    h3 {
+      margin: 0;
+      font-size: ${({ theme }) => theme.typography.fontSize.sm};
+      font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+      color: ${({ theme }) => theme.colors.text.primary};
+    }
+  }
+
+  .node-content {
+    display: flex;
+    flex-direction: column;
+    gap: ${({ theme }) => theme.spacing.sm};
+  }
+
+  .react-flow__handle {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: ${({ theme }) => theme.colors.primary.main};
+    border: 2px solid ${({ theme }) => theme.colors.background.primary};
+    transition: all ${({ theme }) => theme.transitions.default};
+
+    &:hover {
+      background: ${({ theme }) => theme.colors.primary.light};
+      transform: scale(1.2);
+    }
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: ${({ theme }) => theme.spacing.xs};
+
+    .label-text {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      span {
+        font-size: ${({ theme }) => theme.typography.fontSize.xs};
+        color: ${({ theme }) => theme.colors.text.secondary};
+      }
+    }
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: ${({ theme }) => theme.borderRadius.full};
+    background: ${({ theme }) => theme.colors.background.tertiary};
+    outline: none;
+    opacity: 0.7;
+    transition: all ${({ theme }) => theme.transitions.default};
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: ${({ theme }) => theme.colors.primary.main};
+      cursor: pointer;
+      transition: all ${({ theme }) => theme.transitions.default};
+
+      &:hover {
+        background: ${({ theme }) => theme.colors.primary.light};
+        transform: scale(1.2);
+      }
+    }
+  }
+
+  select {
+    padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    color: ${({ theme }) => theme.colors.text.primary};
+    background: ${({ theme }) => theme.colors.background.primary};
+    border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
+    border-radius: ${({ theme }) => theme.borderRadius.sm};
+    outline: none;
+    cursor: pointer;
+    transition: all ${({ theme }) => theme.transitions.default};
+
+    &:hover {
+      border-color: ${({ theme }) => theme.colors.primary.main};
+    }
+
+    &:focus {
+      border-color: ${({ theme }) => theme.colors.primary.main};
+      box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary.main}22;
+    }
+  }
+`;

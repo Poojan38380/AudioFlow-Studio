@@ -1,69 +1,76 @@
 import React, { memo } from "react";
 import { Handle } from "@xyflow/react";
 import { shallow } from "zustand/shallow";
-import { tw } from "twind";
-
+import { BaseNode, Button } from "../components/common";
 import { useStore } from "../store";
 
-// Memoized selector
+const PlayIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width="20"
+    height="20"
+  >
+    <polygon points="5 3 19 12 5 21 5 3" />
+  </svg>
+);
+
+const StopIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width="20"
+    height="20"
+  >
+    <rect x="6" y="6" width="12" height="12" />
+  </svg>
+);
+
 const selector = (store) => ({
   isRunning: store.isRunning,
   toggleAudio: store.toggleAudio,
 });
 
-// Memoized mute button component
-const MuteButton = memo(({ isRunning, onClick }) => (
-  <button
-    onClick={onClick}
-    aria-label={isRunning ? "Mute audio" : "Unmute audio"}
-    className={tw(
-      "focus:outline-none focus:ring-2 focus:ring-green-500 rounded-full p-2 hover:bg-gray-100 transition-colors"
-    )}
-  >
-    {isRunning ? (
-      <span role="img" aria-label="mute" className={tw("text-xl")}>
-        🔈
-      </span>
-    ) : (
-      <span role="img" aria-label="unmute" className={tw("text-xl")}>
-        🔇
-      </span>
-    )}
-  </button>
-));
-
-MuteButton.displayName = "MuteButton";
-
 const Out = memo(() => {
   const { isRunning, toggleAudio } = useStore(selector, shallow);
 
   return (
-    <div
-      className={tw(
-        "rounded-lg bg-white shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100"
-      )}
-    >
-      <Handle
-        className={tw(
-          "w-3 h-3 bg-blue-500 border-2 border-white rounded-full shadow-sm -top-1.5"
-        )}
-        type="target"
-        position="top"
-        aria-label="Input connection"
-      />
+    <BaseNode type="out">
+      <Handle type="target" position="top" />
 
-      <div
-        className={tw(
-          "rounded-t-lg px-3 py-2 bg-gradient-to-r from-green-500 to-green-600"
-        )}
-      >
-        <p className={tw("text-sm font-medium text-white")}>Output</p>
+      <div className="node-header">
+        <h3>Output</h3>
       </div>
 
-      <div className={tw("flex justify-center items-center py-3")}>
-        <MuteButton isRunning={isRunning} onClick={toggleAudio} />
+      <div className="node-content">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleAudio}
+          style={{
+            width: "40px",
+            height: "40px",
+            borderRadius: "50%",
+            padding: 0,
+            margin: "8px auto",
+            color: isRunning ? "#ef4444" : "#10b981",
+          }}
+          title={isRunning ? "Stop Audio" : "Start Audio"}
+        >
+          {isRunning ? <StopIcon /> : <PlayIcon />}
+        </Button>
       </div>
-    </div>
+    </BaseNode>
   );
 });
 
