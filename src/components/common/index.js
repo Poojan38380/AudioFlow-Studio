@@ -233,12 +233,65 @@ export const BaseNode = styled.div`
     }};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   padding: ${({ theme }) => theme.spacing.md};
-  min-width: 200px;
+  min-width: 220px;
   box-shadow: ${({ theme }) => theme.shadows.sm};
   transition: all ${({ theme }) => theme.transitions.default};
+  position: relative;
+
+  /* Increase the clickable area around the node */
+  &::before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    z-index: -1;
+  }
+
+  /* Style for React Flow handles */
+  .react-flow__handle {
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    background: ${({ theme }) => theme.colors.background.primary};
+    border: 2px solid ${({ theme }) => theme.colors.background.tertiary};
+    transition: all ${({ theme }) => theme.transitions.default};
+
+    &:hover {
+      width: 14px;
+      height: 14px;
+      border-radius: 7px;
+      border-color: ${({ theme }) => theme.colors.primary.main};
+    }
+
+    /* Increase the clickable area of handles */
+    &::before {
+      content: "";
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      right: -8px;
+      bottom: -8px;
+      z-index: -1;
+    }
+
+    /* Position adjustments for handles */
+    &.react-flow__handle-top {
+      top: -6px;
+    }
+    &.react-flow__handle-bottom {
+      bottom: -6px;
+    }
+  }
 
   &:hover {
     box-shadow: ${({ theme }) => theme.shadows.md};
+    transform: translateY(-1px);
+
+    .react-flow__handle {
+      border-color: ${({ theme }) => theme.colors.primary.main};
+    }
   }
 
   .node-header {
@@ -259,88 +312,44 @@ export const BaseNode = styled.div`
     display: flex;
     flex-direction: column;
     gap: ${({ theme }) => theme.spacing.sm};
-  }
 
-  .react-flow__handle {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: ${({ theme }) => theme.colors.primary.main};
-    border: 2px solid ${({ theme }) => theme.colors.background.primary};
-    transition: all ${({ theme }) => theme.transitions.default};
-
-    &:hover {
-      background: ${({ theme }) => theme.colors.primary.light};
-      transform: scale(1.2);
-    }
-  }
-
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: ${({ theme }) => theme.spacing.xs};
-
-    .label-text {
+    label {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      gap: ${({ theme }) => theme.spacing.xs};
 
-      span {
-        font-size: ${({ theme }) => theme.typography.fontSize.xs};
+      .label-text {
+        display: flex;
+        justify-content: space-between;
+        font-size: ${({ theme }) => theme.typography.fontSize.sm};
         color: ${({ theme }) => theme.colors.text.secondary};
       }
     }
-  }
 
-  input[type="range"] {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 4px;
-    border-radius: ${({ theme }) => theme.borderRadius.full};
-    background: ${({ theme }) => theme.colors.background.tertiary};
-    outline: none;
-    opacity: 0.7;
-    transition: all ${({ theme }) => theme.transitions.default};
-
-    &:hover {
-      opacity: 1;
+    input[type="range"] {
+      width: 100%;
+      margin: 0;
     }
 
-    &::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: ${({ theme }) => theme.colors.primary.main};
+    select {
+      width: 100%;
+      padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
+      background: ${({ theme }) => theme.colors.background.primary};
+      border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
+      border-radius: ${({ theme }) => theme.borderRadius.sm};
+      color: ${({ theme }) => theme.colors.text.primary};
+      font-size: ${({ theme }) => theme.typography.fontSize.sm};
       cursor: pointer;
-      transition: all ${({ theme }) => theme.transitions.default};
 
       &:hover {
-        background: ${({ theme }) => theme.colors.primary.light};
-        transform: scale(1.2);
+        border-color: ${({ theme }) => theme.colors.primary.main};
       }
-    }
-  }
 
-  select {
-    padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
-    font-size: ${({ theme }) => theme.typography.fontSize.sm};
-    color: ${({ theme }) => theme.colors.text.primary};
-    background: ${({ theme }) => theme.colors.background.primary};
-    border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
-    border-radius: ${({ theme }) => theme.borderRadius.sm};
-    outline: none;
-    cursor: pointer;
-    transition: all ${({ theme }) => theme.transitions.default};
-
-    &:hover {
-      border-color: ${({ theme }) => theme.colors.primary.main};
-    }
-
-    &:focus {
-      border-color: ${({ theme }) => theme.colors.primary.main};
-      box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary.main}22;
+      &:focus {
+        outline: none;
+        border-color: ${({ theme }) => theme.colors.primary.main};
+        box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary.main}22;
+      }
     }
   }
 `;
