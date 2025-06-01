@@ -55,6 +55,10 @@ const nodeConfigs = {
     defaultData: { delay: 30, depth: 0.5, rate: 1.5, mix: 0.5 },
     defaultPosition: { x: 0, y: 0 },
   },
+  phaser: {
+    defaultData: { stages: 6, freq: 1000, q: 1, rate: 1, mix: 0.5 },
+    defaultPosition: { x: 0, y: 0 },
+  },
 };
 
 export const useStore = createWithEqualityFn((set, get) => ({

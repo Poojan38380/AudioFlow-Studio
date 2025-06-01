@@ -147,6 +147,68 @@ export function updateAudioNode(id, data) {
     return;
   }
 
+  // Special handling for phaser parameters
+  if (node.type === "phaser") {
+    if (data.stages !== undefined && data.stages !== node.filters.length) {
+      // Recreate filters if number of stages changes
+      const oldFilters = node.filters;
+      const newFilters = Array(data.stages)
+        .fill()
+        .map(() => {
+          const filter = ctx.createBiquadFilter();
+          filter.type = "allpass";
+          filter.frequency.value = oldFilters[0].frequency.value;
+          filter.Q.value = oldFilters[0].Q.value;
+          return filter;
+        });
+
+      // Disconnect old filters
+      oldFilters[0].disconnect();
+      oldFilters.forEach((f) => {
+        node.lfoGain.disconnect(f.frequency);
+      });
+
+      // Connect new filters
+      node.input.connect(newFilters[0]);
+      newFilters.reduce((prev, curr) => {
+        prev.connect(curr);
+        return curr;
+      });
+      newFilters[newFilters.length - 1].connect(node.wetGain);
+
+      // Connect LFO to new filters
+      newFilters.forEach((filter) => {
+        node.lfoGain.connect(filter.frequency);
+      });
+
+      node.filters = newFilters;
+    }
+
+    if (data.freq !== undefined) {
+      node.filters.forEach((filter) => {
+        filter.frequency.setValueAtTime(data.freq, now);
+      });
+      node.lfoGain.gain.setValueAtTime(data.freq * 0.5, now);
+    }
+
+    if (data.q !== undefined) {
+      node.filters.forEach((filter) => {
+        filter.Q.setValueAtTime(data.q, now);
+      });
+    }
+
+    if (data.rate !== undefined) {
+      node.lfo.frequency.setValueAtTime(data.rate, now);
+    }
+
+    if (data.mix !== undefined) {
+      node.dryGain.gain.setValueAtTime(1 - data.mix, now);
+      node.wetGain.gain.setValueAtTime(data.mix, now);
+    }
+
+    return;
+  }
+
   // Handle other parameter updates
   for (const [key, val] of Object.entries(data)) {
     if (node[key] instanceof AudioParam) {
@@ -485,6 +547,88 @@ export function createAudioNode(id, type, data) {
         dryGain.connect(merger, 0, 1);
         panLeft.connect(merger, 0, 0);
         panRight.connect(merger, 0, 1);
+
+        break;
+      }
+      case "phaser": {
+        // Create allpass filters for phasing
+        const filters = Array(data.stages)
+          .fill()
+          .map(() => {
+            const filter = ctx.createBiquadFilter();
+            filter.type = "allpass";
+            filter.frequency.value = data.freq;
+            filter.Q.value = data.q;
+            return filter;
+          });
+
+        // Create LFO for frequency modulation
+        const lfo = ctx.createOscillator();
+        lfo.frequency.value = data.rate;
+        const lfoGain = ctx.createGain();
+        lfoGain.gain.value = data.freq * 0.5; // Modulation depth
+        lfo.connect(lfoGain);
+        lfo.start();
+
+        // Connect LFO to all filter frequencies
+        filters.forEach((filter) => {
+          lfoGain.connect(filter.frequency);
+        });
+
+        // Create dry/wet mix controls
+        const dryGain = ctx.createGain();
+        const wetGain = ctx.createGain();
+        dryGain.gain.value = 1 - data.mix;
+        wetGain.gain.value = data.mix;
+
+        // Create input gain for proper leveling
+        const input = ctx.createGain();
+        input.gain.value = 0.7;
+
+        // Create output gain
+        const output = ctx.createGain();
+        output.gain.value = 1.0;
+
+        // Store all nodes in a container
+        node = {
+          type: "phaser",
+          input,
+          filters,
+          lfo,
+          lfoGain,
+          dryGain,
+          wetGain,
+          output,
+          connect(target) {
+            if (target.input && target.type) {
+              output.connect(target.input);
+            } else {
+              output.connect(target);
+            }
+          },
+          disconnect(target) {
+            if (target.input && target.type) {
+              output.disconnect(target.input);
+            } else {
+              output.disconnect(target);
+            }
+          },
+        };
+
+        // Set up internal connections
+        input.connect(dryGain);
+        input.connect(filters[0]);
+        dryGain.connect(output);
+
+        // Connect filters in series
+        filters.reduce((prev, curr) => {
+          prev.connect(curr);
+          return curr;
+        });
+
+        // Connect last filter to wet gain
+        filters[filters.length - 1].connect(wetGain);
+        wetGain.connect(output);
 
         break;
       }
