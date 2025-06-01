@@ -73,6 +73,17 @@ export const useStore = createWithEqualityFn((set, get) => ({
     set({ isRunning: isRunning() });
   },
 
+  clearCanvas: () => {
+    // Stop audio if running
+    if (isRunning()) {
+      toggleAudio();
+    }
+    // Remove all audio nodes
+    get().nodes.forEach(({ id }) => removeAudioNode(id));
+    // Clear state
+    set({ nodes: [], edges: [] });
+  },
+
   onNodesChange: (changes) => {
     set({
       nodes: applyNodeChanges(changes, get().nodes),

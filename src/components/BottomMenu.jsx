@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { useTheme } from "../theme/ThemeContext";
+import { useStore } from "../store";
 
 const MenuContainer = styled.div`
   position: fixed;
@@ -208,6 +209,22 @@ const PlusIcon = () => (
   </svg>
 );
 
+const TrashIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m4-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+    />
+  </svg>
+);
+
 const AudioIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -316,6 +333,7 @@ const nodeCategories = {
 export const BottomMenu = ({ onAddNode }) => {
   const { currentTheme, toggleTheme } = useTheme();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const clearCanvas = useStore((state) => state.clearCanvas);
   const menuRef = useRef(null);
   const dropdownRef = useRef(null);
 
@@ -359,6 +377,10 @@ export const BottomMenu = ({ onAddNode }) => {
         <Divider />
         <MenuButton onClick={toggleTheme} data-tooltip="Toggle Theme">
           {currentTheme === "light" ? <MoonIcon /> : <SunIcon />}
+        </MenuButton>
+        <Divider />
+        <MenuButton onClick={clearCanvas} data-tooltip="Clear Canvas">
+          <TrashIcon />
         </MenuButton>
       </MenuContainer>
       <NodeDropdown isOpen={isDropdownOpen} ref={dropdownRef}>
