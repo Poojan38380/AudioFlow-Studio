@@ -17,15 +17,15 @@ const MuteButton = memo(({ isRunning, onClick }) => (
     onClick={onClick}
     aria-label={isRunning ? "Mute audio" : "Unmute audio"}
     className={tw(
-      "focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1"
+      "focus:outline-none focus:ring-2 focus:ring-green-500 rounded-full p-2 hover:bg-gray-100 transition-colors"
     )}
   >
     {isRunning ? (
-      <span role="img" aria-label="mute">
+      <span role="img" aria-label="mute" className={tw("text-xl")}>
         🔈
       </span>
     ) : (
-      <span role="img" aria-label="unmute">
+      <span role="img" aria-label="unmute" className={tw("text-xl")}>
         🔇
       </span>
     )}
@@ -38,14 +38,31 @@ const Out = memo(() => {
   const { isRunning, toggleAudio } = useStore(selector, shallow);
 
   return (
-    <div className={tw("rounded-md bg-white shadow-xl px-4 py-2")}>
+    <div
+      className={tw(
+        "rounded-lg bg-white shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100"
+      )}
+    >
       <Handle
-        className={tw("w-2 h-2")}
+        className={tw(
+          "w-3 h-3 bg-blue-500 border-2 border-white rounded-full shadow-sm -top-1.5"
+        )}
         type="target"
         position="top"
         aria-label="Input connection"
       />
-      <MuteButton isRunning={isRunning} onClick={toggleAudio} />
+
+      <div
+        className={tw(
+          "rounded-t-lg px-3 py-2 bg-gradient-to-r from-green-500 to-green-600"
+        )}
+      >
+        <p className={tw("text-sm font-medium text-white")}>Output</p>
+      </div>
+
+      <div className={tw("flex justify-center items-center py-3")}>
+        <MuteButton isRunning={isRunning} onClick={toggleAudio} />
+      </div>
     </div>
   );
 });
