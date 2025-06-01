@@ -1,7 +1,7 @@
-import { Background, Panel, ReactFlow } from "@xyflow/react";
+import { Background, ReactFlow } from "@xyflow/react";
 import { useStore } from "./store";
 import { shallow } from "zustand/shallow";
-import { useCallback, memo, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import Osc from "./nodes/Osc";
 import Out from "./nodes/Out";
 import Amp from "./nodes/Amp";
@@ -10,6 +10,7 @@ import Flanger from "./nodes/Flanger";
 import Chorus from "./nodes/Chorus";
 import Phaser from "./nodes/Phaser";
 import Waveform from "./nodes/Waveform";
+import NodeMenu from "./components/NodeMenu";
 
 // Memoized node types
 const nodeTypes = {
@@ -22,20 +23,6 @@ const nodeTypes = {
   phaser: Phaser,
   waveform: Waveform,
 };
-
-// Memoized button component with proper prop types
-const AddNodeButton = memo(({ label, onClick }) => (
-  <button
-    className="px-2 py-1 rounded bg-white shadow hover:bg-gray-50 transition-colors"
-    onClick={onClick}
-    aria-label={`Add ${label} node`}
-    title={`Add ${label} node`}
-  >
-    {label}
-  </button>
-));
-
-AddNodeButton.displayName = "AddNodeButton";
 
 // Memoized selector to prevent unnecessary re-renders
 const selector = (store) => ({
@@ -52,26 +39,8 @@ const selector = (store) => ({
 export default function App() {
   const store = useStore(selector, shallow);
 
-  // Memoized event handlers
-  const handleAddOsc = useCallback(() => store.createNode("osc"), [store]);
-  const handleAddAmp = useCallback(() => store.createNode("amp"), [store]);
-  const handleAddNoise = useCallback(() => store.createNode("noise"), [store]);
-  const handleAddFlanger = useCallback(
-    () => store.createNode("flanger"),
-    [store]
-  );
-  const handleAddChorus = useCallback(
-    () => store.createNode("chorus"),
-    [store]
-  );
-  const handleAddPhaser = useCallback(
-    () => store.createNode("phaser"),
-    [store]
-  );
-  const handleAddWaveform = useCallback(
-    () => store.createNode("waveform"),
-    [store]
-  );
+  // Memoized event handler for creating nodes
+  const handleAddNode = useCallback((type) => store.createNode(type), [store]);
 
   // Memoized ReactFlow props
   const flowProps = useMemo(
@@ -93,17 +62,11 @@ export default function App() {
   );
 
   return (
-    <ReactFlow {...flowProps}>
-      <Panel className="space-x-4" position="top-right">
-        <AddNodeButton label="Add Osc" onClick={handleAddOsc} />
-        <AddNodeButton label="Add Amp" onClick={handleAddAmp} />
-        <AddNodeButton label="Add Noise" onClick={handleAddNoise} />
-        <AddNodeButton label="Add Flanger" onClick={handleAddFlanger} />
-        <AddNodeButton label="Add Chorus" onClick={handleAddChorus} />
-        <AddNodeButton label="Add Phaser" onClick={handleAddPhaser} />
-        <AddNodeButton label="Add Waveform" onClick={handleAddWaveform} />
-      </Panel>
-      <Background />
-    </ReactFlow>
+    <>
+      <ReactFlow {...flowProps}>
+        <Background />
+      </ReactFlow>
+      <NodeMenu onAddNode={handleAddNode} />
+    </>
   );
 }
