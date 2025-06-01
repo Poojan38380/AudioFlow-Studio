@@ -1,7 +1,7 @@
 import { Background, ReactFlow } from "@xyflow/react";
 import { useStore } from "./store";
 import { shallow } from "zustand/shallow";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import Osc from "./nodes/Osc";
 import Out from "./nodes/Out";
 import Amp from "./nodes/Amp";
@@ -10,7 +10,6 @@ import Flanger from "./nodes/Flanger";
 import Chorus from "./nodes/Chorus";
 import Phaser from "./nodes/Phaser";
 import Waveform from "./nodes/Waveform";
-import NodeMenu from "./components/NodeMenu";
 
 // Memoized node types
 const nodeTypes = {
@@ -39,9 +38,6 @@ const selector = (store) => ({
 export default function App() {
   const store = useStore(selector, shallow);
 
-  // Memoized event handler for creating nodes
-  const handleAddNode = useCallback((type) => store.createNode(type), [store]);
-
   // Memoized ReactFlow props
   const flowProps = useMemo(
     () => ({
@@ -66,7 +62,6 @@ export default function App() {
       <ReactFlow {...flowProps}>
         <Background />
       </ReactFlow>
-      <NodeMenu onAddNode={handleAddNode} />
     </>
   );
 }
