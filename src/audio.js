@@ -664,57 +664,6 @@ export function createAudioNode(id, type, data) {
 
         break;
       }
-      case "wavesnapshot": {
-        // Create analyzer node with high resolution
-        const analyser = ctx.createAnalyser();
-        analyser.fftSize = 2048;
-        analyser.smoothingTimeConstant = 0.0; // No smoothing for accurate period detection
-
-        // Create input gain for proper leveling and connection point
-        const input = ctx.createGain();
-        input.gain.value = 1.0;
-
-        // Connect input to analyzer
-        input.connect(analyser);
-
-        // Store all nodes in a container
-        node = {
-          type: "wavesnapshot",
-          analyser,
-          input,
-          connect() {
-            // No output connections needed for analyzer
-          },
-          disconnect() {
-            input.disconnect();
-            analyser.disconnect();
-          },
-        };
-
-        break;
-      }
-      case "out": {
-        // Create a gain node for the final output
-        const input = ctx.createGain();
-        input.gain.value = 1.0;
-
-        // Connect to the audio context destination
-        input.connect(ctx.destination);
-
-        // Store the node
-        node = {
-          type: "out",
-          input,
-          connect() {
-            // Output node doesn't connect to anything
-          },
-          disconnect() {
-            input.disconnect();
-          },
-        };
-
-        break;
-      }
       default:
         throw new Error(`Unknown node type: ${type}`);
     }

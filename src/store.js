@@ -21,8 +21,13 @@ const initialState = {
       data: { frequency: 220, type: "square" },
       position: { x: 0, y: 0 },
     },
-
-    { id: "b", type: "out", position: { x: 0, y: 500 } },
+    {
+      id: "b",
+      type: "amp",
+      data: { gain: 0.5 },
+      position: { x: -100, y: 250 },
+    },
+    { id: "c", type: "out", position: { x: 100, y: 500 } },
   ],
   edges: [],
   isRunning: isRunning(),
@@ -64,14 +69,6 @@ const nodeConfigs = {
   },
   waveform: {
     defaultData: { zoom: 1 },
-    defaultPosition: { x: 0, y: 0 },
-  },
-  wavesnapshot: {
-    defaultData: { zoom: 1 },
-    defaultPosition: { x: 0, y: 0 },
-  },
-  out: {
-    defaultData: {},
     defaultPosition: { x: 0, y: 0 },
   },
 };
