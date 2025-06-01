@@ -2,6 +2,9 @@
 let context = null;
 const nodes = new Map();
 
+// Expose nodes Map to window for visualization
+window.nodes = nodes;
+
 // Lazy initialization of AudioContext
 function getAudioContext() {
   if (!context) {
@@ -629,6 +632,48 @@ export function createAudioNode(id, type, data) {
         // Connect last filter to wet gain
         filters[filters.length - 1].connect(wetGain);
         wetGain.connect(output);
+
+        break;
+      }
+      case "waveform": {
+        // Create analyzer node
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = 0.8;
+
+        // Create input gain for proper leveling
+        const input = ctx.createGain();
+        input.gain.value = 1.0;
+
+        // Create output gain
+        const output = ctx.createGain();
+        output.gain.value = 1.0;
+
+        // Store all nodes in a container
+        node = {
+          type: "waveform",
+          input,
+          analyser,
+          output,
+          connect(target) {
+            if (target.input && target.type) {
+              output.connect(target.input);
+            } else {
+              output.connect(target);
+            }
+          },
+          disconnect(target) {
+            if (target.input && target.type) {
+              output.disconnect(target.input);
+            } else {
+              output.disconnect(target);
+            }
+          },
+        };
+
+        // Set up internal connections
+        input.connect(analyser);
+        analyser.connect(output);
 
         break;
       }

@@ -9,6 +9,7 @@ import Noise from "./nodes/Noise";
 import Flanger from "./nodes/Flanger";
 import Chorus from "./nodes/Chorus";
 import Phaser from "./nodes/Phaser";
+import Waveform from "./nodes/Waveform";
 
 // Memoized node types
 const nodeTypes = {
@@ -19,6 +20,7 @@ const nodeTypes = {
   flanger: Flanger,
   chorus: Chorus,
   phaser: Phaser,
+  waveform: Waveform,
 };
 
 // Memoized button component with proper prop types
@@ -66,6 +68,10 @@ export default function App() {
     () => store.createNode("phaser"),
     [store]
   );
+  const handleAddWaveform = useCallback(
+    () => store.createNode("waveform"),
+    [store]
+  );
 
   // Memoized ReactFlow props
   const flowProps = useMemo(
@@ -95,6 +101,7 @@ export default function App() {
         <AddNodeButton label="Add Flanger" onClick={handleAddFlanger} />
         <AddNodeButton label="Add Chorus" onClick={handleAddChorus} />
         <AddNodeButton label="Add Phaser" onClick={handleAddPhaser} />
+        <AddNodeButton label="Add Waveform" onClick={handleAddWaveform} />
       </Panel>
       <Background />
     </ReactFlow>

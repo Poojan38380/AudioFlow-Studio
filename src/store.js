@@ -59,6 +59,10 @@ const nodeConfigs = {
     defaultData: { stages: 6, freq: 1000, q: 1, rate: 1, mix: 0.5 },
     defaultPosition: { x: 0, y: 0 },
   },
+  waveform: {
+    defaultData: { zoom: 1 },
+    defaultPosition: { x: 0, y: 0 },
+  },
 };
 
 export const useStore = createWithEqualityFn((set, get) => ({
