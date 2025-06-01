@@ -366,17 +366,17 @@ export function createAudioNode(id, type, data) {
               this.currentSource = createAndStartSource();
             }
             // Connect to the target
-            if (target.input && target.type) {
+            if (target?.input && target?.type) {
               this.gainNode.connect(target.input);
-            } else {
+            } else if (target) {
               this.gainNode.connect(target);
             }
           },
           disconnect(target) {
             // Disconnect from target
-            if (target.input && target.type) {
+            if (target?.input && target?.type) {
               this.gainNode.disconnect(target.input);
-            } else {
+            } else if (target) {
               this.gainNode.disconnect(target);
             }
 
@@ -427,18 +427,18 @@ export function createAudioNode(id, type, data) {
           mix,
           connect(target) {
             // Connect the final mix to the target
-            if (target.input && target.type) {
+            if (target?.input && target?.type) {
               // If target is a custom node (like another flanger), connect to its input
               mix.connect(target.input);
-            } else {
+            } else if (target) {
               // If target is a native AudioNode, connect directly
               mix.connect(target);
             }
           },
           disconnect(target) {
-            if (target.input && target.type) {
+            if (target?.input && target?.type) {
               mix.disconnect(target.input);
-            } else {
+            } else if (target) {
               mix.disconnect(target);
             }
           },
@@ -520,16 +520,16 @@ export function createAudioNode(id, type, data) {
           panRight,
           merger,
           connect(target) {
-            if (target.input && target.type) {
+            if (target?.input && target?.type) {
               merger.connect(target.input);
-            } else {
+            } else if (target) {
               merger.connect(target);
             }
           },
           disconnect(target) {
-            if (target.input && target.type) {
+            if (target?.input && target?.type) {
               merger.disconnect(target.input);
-            } else {
+            } else if (target) {
               merger.disconnect(target);
             }
           },
@@ -603,16 +603,16 @@ export function createAudioNode(id, type, data) {
           wetGain,
           output,
           connect(target) {
-            if (target.input && target.type) {
+            if (target?.input && target?.type) {
               output.connect(target.input);
-            } else {
+            } else if (target) {
               output.connect(target);
             }
           },
           disconnect(target) {
-            if (target.input && target.type) {
+            if (target?.input && target?.type) {
               output.disconnect(target.input);
-            } else {
+            } else if (target) {
               output.disconnect(target);
             }
           },
@@ -636,44 +636,31 @@ export function createAudioNode(id, type, data) {
         break;
       }
       case "waveform": {
-        // Create analyzer node
+        // Create analyzer node with high resolution
         const analyser = ctx.createAnalyser();
         analyser.fftSize = 2048;
         analyser.smoothingTimeConstant = 0.8;
 
-        // Create input gain for proper leveling
+        // Create input gain for proper leveling and connection point
         const input = ctx.createGain();
         input.gain.value = 1.0;
 
-        // Create output gain
-        const output = ctx.createGain();
-        output.gain.value = 1.0;
+        // Connect input to analyzer
+        input.connect(analyser);
 
         // Store all nodes in a container
         node = {
           type: "waveform",
-          input,
           analyser,
-          output,
-          connect(target) {
-            if (target.input && target.type) {
-              output.connect(target.input);
-            } else {
-              output.connect(target);
-            }
+          input,
+          connect() {
+            // No output connections needed for analyzer
           },
-          disconnect(target) {
-            if (target.input && target.type) {
-              output.disconnect(target.input);
-            } else {
-              output.disconnect(target);
-            }
+          disconnect() {
+            input.disconnect();
+            analyser.disconnect();
           },
         };
-
-        // Set up internal connections
-        input.connect(analyser);
-        analyser.connect(output);
 
         break;
       }

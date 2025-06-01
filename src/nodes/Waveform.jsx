@@ -37,11 +37,29 @@ const ParamInput = memo(({ label, value, onChange, min, max, step }) => (
 
 ParamInput.displayName = "ParamInput";
 
+const drawNoSignal = (ctx, width, height) => {
+  ctx.fillStyle = "rgb(32, 33, 36)";
+  ctx.fillRect(0, 0, width, height);
+  ctx.font = "14px Arial";
+  ctx.fillStyle = "rgb(156, 163, 175)";
+  ctx.textAlign = "center";
+  ctx.fillText("Waiting for Input", width / 2, height / 2);
+
+  // Draw a flat line
+  ctx.beginPath();
+  ctx.moveTo(0, height / 2);
+  ctx.lineTo(width, height / 2);
+  ctx.strokeStyle = "rgb(75, 85, 99)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+};
+
 const Waveform = memo(({ id, data }) => {
   const canvasRef = useRef(null);
   const { setZoom } = useStore(createSelector(id), shallow);
   const frameRef = useRef(0);
   const [error, setError] = React.useState(null);
+  const [hasSignal, setHasSignal] = React.useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -51,13 +69,7 @@ const Waveform = memo(({ id, data }) => {
     const audioNode = window.nodes?.get(id);
 
     if (!audioNode?.analyser) {
-      // Draw "No Signal" message
-      ctx.fillStyle = "rgb(32, 33, 36)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.font = "14px Arial";
-      ctx.fillStyle = "rgb(156, 163, 175)";
-      ctx.textAlign = "center";
-      ctx.fillText("No Signal", canvas.width / 2, canvas.height / 2);
+      drawNoSignal(ctx, canvas.width, canvas.height);
       return;
     }
 
@@ -74,11 +86,17 @@ const Waveform = memo(({ id, data }) => {
       try {
         audioNode.analyser.getFloatTimeDomainData(dataArray);
 
+        // Check if we have any non-zero values
+        const hasNonZero = dataArray.some((val) => Math.abs(val) > 0.001);
+        setHasSignal(hasNonZero);
+
         canvasCtx.fillStyle = "rgb(32, 33, 36)";
         canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
         canvasCtx.lineWidth = 2;
-        canvasCtx.strokeStyle = "rgb(99, 102, 241)";
+        canvasCtx.strokeStyle = hasNonZero
+          ? "rgb(99, 102, 241)"
+          : "rgb(75, 85, 99)";
         canvasCtx.beginPath();
 
         const sliceWidth = (WIDTH * 1.0) / dataArray.length;
@@ -99,6 +117,14 @@ const Waveform = memo(({ id, data }) => {
 
         canvasCtx.lineTo(canvas.width, canvas.height / 2);
         canvasCtx.stroke();
+
+        // Draw status text
+        if (!hasNonZero) {
+          canvasCtx.font = "12px Arial";
+          canvasCtx.fillStyle = "rgb(156, 163, 175)";
+          canvasCtx.textAlign = "center";
+          canvasCtx.fillText("No Signal", WIDTH / 2, 20);
+        }
       } catch (err) {
         console.error("Error drawing waveform:", err);
         setError("Error drawing waveform");
@@ -133,7 +159,9 @@ const Waveform = memo(({ id, data }) => {
           "rounded-t-lg px-3 py-2 bg-gradient-to-r from-gray-700 to-gray-800"
         )}
       >
-        <p className={tw("text-sm font-medium text-white")}>Waveform</p>
+        <p className={tw("text-sm font-medium text-white")}>
+          Waveform {hasSignal && "●"}
+        </p>
       </div>
 
       <div className={tw("p-2 bg-gray-900")}>
@@ -158,15 +186,6 @@ const Waveform = memo(({ id, data }) => {
           step={0.1}
         />
       </div>
-
-      <Handle
-        className={tw(
-          "w-3 h-3 bg-blue-500 border-2 border-white rounded-full shadow-sm -bottom-1.5"
-        )}
-        type="source"
-        position="bottom"
-        aria-label="Output connection"
-      />
     </div>
   );
 });
