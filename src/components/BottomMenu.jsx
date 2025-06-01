@@ -5,29 +5,28 @@ import { useTheme } from "../theme/ThemeContext";
 const MenuContainer = styled.div`
   position: fixed;
   bottom: ${({ theme }) => theme.spacing.lg};
-  left: 50%;
-  transform: translateX(-50%);
-  background: ${({ theme }) =>
-    theme.currentTheme === "dark"
-      ? "rgba(39, 39, 42, 0.95)"
-      : "rgba(255, 255, 255, 0.95)"};
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  left: ${({ theme }) => theme.spacing.lg};
+  background: ${({ theme }) => theme.colors.background.secondary};
   border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  padding: ${({ theme }) => theme.spacing.xs};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  padding: ${({ theme }) => theme.spacing.sm};
   display: flex;
-  gap: ${({ theme }) => theme.spacing.xs};
-  box-shadow: ${({ theme }) => theme.shadows.lg};
-  z-index: 1000;
+  gap: ${({ theme }) => theme.spacing.sm};
+  box-shadow: ${({ theme }) => theme.shadows.md};
+  z-index: ${({ theme }) => theme.zIndex.dropdown};
+  transition: all ${({ theme }) => theme.transitions.default};
+
+  &:hover {
+    box-shadow: ${({ theme }) => theme.shadows.lg};
+  }
 `;
 
 const MenuButton = styled.button`
-  width: 40px;
-  height: 40px;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  border: none;
-  background: transparent;
+  width: 36px;
+  height: 36px;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
+  background: ${({ theme }) => theme.colors.background.primary};
   color: ${({ theme }) => theme.colors.text.primary};
   display: flex;
   align-items: center;
@@ -37,8 +36,9 @@ const MenuButton = styled.button`
   position: relative;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.background.tertiary};
-    transform: translateY(-2px);
+    background: ${({ theme }) => theme.colors.background.secondary};
+    transform: translateY(-1px);
+    box-shadow: ${({ theme }) => theme.shadows.sm};
   }
 
   &:active {
@@ -46,8 +46,8 @@ const MenuButton = styled.button`
   }
 
   svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
 
   &::after {
@@ -56,65 +56,61 @@ const MenuButton = styled.button`
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%) translateY(-${({ theme }) => theme.spacing.xs});
-    padding: ${({ theme }) => `${theme.spacing.xxs} ${theme.spacing.xs}`};
+    padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
     background: ${({ theme }) => theme.colors.background.secondary};
     color: ${({ theme }) => theme.colors.text.primary};
-    border-radius: ${({ theme }) => theme.borderRadius.sm};
+    border-radius: ${({ theme }) => theme.borderRadius.md};
     font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
     white-space: nowrap;
     opacity: 0;
     visibility: hidden;
     transition: all ${({ theme }) => theme.transitions.default};
     box-shadow: ${({ theme }) => theme.shadows.md};
     border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
+    z-index: ${({ theme }) => theme.zIndex.tooltip};
   }
 
   &:hover::after {
     opacity: 1;
     visibility: visible;
-    transform: translateX(-50%) translateY(-${({ theme }) => theme.spacing.sm});
+    transform: translateX(-50%) translateY(-${({ theme }) => theme.spacing.md});
   }
 `;
 
 const Divider = styled.div`
   width: 1px;
   background: ${({ theme }) => theme.colors.background.tertiary};
-  margin: 0 ${({ theme }) => theme.spacing.xxs};
+  margin: 0 ${({ theme }) => theme.spacing.xs};
 `;
 
 const NodeDropdown = styled.div`
   position: fixed;
-  bottom: calc(${({ theme }) => theme.spacing.lg} + 60px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: ${({ theme }) =>
-    theme.currentTheme === "dark"
-      ? "rgba(39, 39, 42, 0.95)"
-      : "rgba(255, 255, 255, 0.95)"};
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  bottom: calc(${({ theme }) => theme.spacing.lg} + 64px);
+  left: ${({ theme }) => theme.spacing.lg};
+  background: ${({ theme }) => theme.colors.background.secondary};
   border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
   padding: ${({ theme }) => theme.spacing.md};
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.md};
-  min-width: 240px;
+  min-width: 260px;
   box-shadow: ${({ theme }) => theme.shadows.lg};
   opacity: ${({ isOpen }) => (isOpen ? 1 : 0)};
   visibility: ${({ isOpen }) => (isOpen ? "visible" : "hidden")};
   transition: all ${({ theme }) => theme.transitions.default};
   pointer-events: ${({ isOpen }) => (isOpen ? "auto" : "none")};
-  z-index: 999;
+  z-index: ${({ theme }) => theme.zIndex.dropdown};
 `;
 
 const CategoryLabel = styled.div`
   font-size: ${({ theme }) => theme.typography.fontSize.sm};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+  font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
   color: ${({ theme }) => theme.colors.text.secondary};
-  padding-bottom: ${({ theme }) => theme.spacing.xxs};
+  padding-bottom: ${({ theme }) => theme.spacing.xs};
   border-bottom: 1px solid ${({ theme }) => theme.colors.background.tertiary};
-  margin-top: ${({ theme }) => theme.spacing.sm};
+  margin-top: ${({ theme }) => theme.spacing.md};
 
   &:first-child {
     margin-top: 0;
@@ -126,30 +122,36 @@ const NodeOption = styled.button`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
   padding: ${({ theme }) => `${theme.spacing.sm} ${theme.spacing.md}`};
-  background: transparent;
-  border: none;
+  background: ${({ theme }) => theme.colors.background.primary};
+  border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
   color: ${({ theme }) => theme.colors.text.primary};
-  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
   cursor: pointer;
   transition: all ${({ theme }) => theme.transitions.default};
   width: 100%;
   text-align: left;
+  font-size: ${({ theme }) => theme.typography.fontSize.sm};
+  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.background.tertiary};
+    background: ${({ theme }) => theme.colors.background.secondary};
+    transform: translateY(-1px);
+    box-shadow: ${({ theme }) => theme.shadows.sm};
   }
 
-  svg {
-    width: 18px;
-    height: 18px;
+  &:active {
+    transform: translateY(0);
   }
 `;
 
 const ColorDot = styled.div`
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: ${({ color }) => color};
+  width: 10px;
+  height: 10px;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  background: ${({ color, theme }) =>
+    typeof color === "function" ? color({ theme }) : color};
+  border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
+  box-shadow: ${({ theme }) => theme.shadows.sm};
 `;
 
 const NodeOptionsGroup = styled.div`
@@ -262,20 +264,52 @@ const OutputIcon = () => (
 
 const nodeCategories = {
   Sources: [
-    { type: "osc", label: "Oscillator", color: "rgb(59, 130, 246)" }, // blue-500
-    { type: "noise", label: "Noise", color: "rgb(34, 197, 94)" }, // green-500
+    {
+      type: "osc",
+      label: "Oscillator",
+      color: ({ theme }) => theme.colors.nodes.audio,
+    },
+    {
+      type: "noise",
+      label: "Noise",
+      color: ({ theme }) => theme.colors.nodes.audio,
+    },
   ],
   Effects: [
-    { type: "amp", label: "Amplifier", color: "rgb(234, 179, 8)" }, // yellow-500
-    { type: "flanger", label: "Flanger", color: "rgb(168, 85, 247)" }, // purple-500
-    { type: "chorus", label: "Chorus", color: "rgb(236, 72, 153)" }, // pink-500
-    { type: "phaser", label: "Phaser", color: "rgb(147, 51, 234)" }, // purple-600
+    {
+      type: "amp",
+      label: "Amplifier",
+      color: ({ theme }) => theme.colors.nodes.effect,
+    },
+    {
+      type: "flanger",
+      label: "Flanger",
+      color: ({ theme }) => theme.colors.nodes.effect,
+    },
+    {
+      type: "chorus",
+      label: "Chorus",
+      color: ({ theme }) => theme.colors.nodes.effect,
+    },
+    {
+      type: "phaser",
+      label: "Phaser",
+      color: ({ theme }) => theme.colors.nodes.effect,
+    },
   ],
   Analysis: [
-    { type: "waveform", label: "Waveform", color: "rgb(75, 85, 99)" }, // gray-600
+    {
+      type: "waveform",
+      label: "Waveform",
+      color: ({ theme }) => theme.colors.nodes.input,
+    },
   ],
   Output: [
-    { type: "out", label: "Output", color: "rgb(239, 68, 68)" }, // red-500
+    {
+      type: "out",
+      label: "Output",
+      color: ({ theme }) => theme.colors.nodes.output,
+    },
   ],
 };
 
