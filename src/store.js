@@ -51,6 +51,10 @@ const nodeConfigs = {
     defaultData: { delay: 5, depth: 0.5, rate: 1, feedback: 0.5 },
     defaultPosition: { x: 0, y: 0 },
   },
+  chorus: {
+    defaultData: { delay: 30, depth: 0.5, rate: 1.5, mix: 0.5 },
+    defaultPosition: { x: 0, y: 0 },
+  },
 };
 
 export const useStore = createWithEqualityFn((set, get) => ({

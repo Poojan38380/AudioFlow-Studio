@@ -125,6 +125,28 @@ export function updateAudioNode(id, data) {
     return;
   }
 
+  // Special handling for chorus parameters
+  if (node.type === "chorus") {
+    if (data.delay !== undefined) {
+      node.delayL.delayTime.setValueAtTime(data.delay / 1000, now);
+      node.delayR.delayTime.setValueAtTime(data.delay / 1000, now);
+    }
+    if (data.depth !== undefined) {
+      node.lfoGainL.gain.setValueAtTime(data.depth / 1000, now);
+      node.lfoGainR.gain.setValueAtTime(data.depth / 1000, now);
+    }
+    if (data.rate !== undefined) {
+      node.lfoL.frequency.setValueAtTime(data.rate, now);
+      node.lfoR.frequency.setValueAtTime(data.rate, now);
+    }
+    if (data.mix !== undefined) {
+      node.dryGain.gain.setValueAtTime(1 - data.mix, now);
+      node.wetGainL.gain.setValueAtTime(data.mix * 0.5, now);
+      node.wetGainR.gain.setValueAtTime(data.mix * 0.5, now);
+    }
+    return;
+  }
+
   // Handle other parameter updates
   for (const [key, val] of Object.entries(data)) {
     if (node[key] instanceof AudioParam) {
@@ -363,6 +385,106 @@ export function createAudioNode(id, type, data) {
         delay.connect(feedback);
         feedback.connect(delay);
         delay.connect(mix);
+
+        break;
+      }
+      case "chorus": {
+        // Create the delay nodes (stereo chorus)
+        const delayL = ctx.createDelay();
+        const delayR = ctx.createDelay();
+        delayL.delayTime.value = data.delay / 1000;
+        delayR.delayTime.value = data.delay / 1000;
+
+        // Create the LFOs for modulating delay time (phase offset for stereo)
+        const lfoL = ctx.createOscillator();
+        const lfoR = ctx.createOscillator();
+        lfoL.frequency.value = data.rate;
+        lfoR.frequency.value = data.rate;
+
+        const lfoGainL = ctx.createGain();
+        const lfoGainR = ctx.createGain();
+        lfoGainL.gain.value = data.depth / 1000;
+        lfoGainR.gain.value = data.depth / 1000;
+
+        // Phase offset for right channel (90 degrees)
+        lfoR.detune.value = 1200; // One octave = 1200 cents
+
+        lfoL.connect(lfoGainL);
+        lfoR.connect(lfoGainR);
+        lfoGainL.connect(delayL.delayTime);
+        lfoGainR.connect(delayR.delayTime);
+        lfoL.start();
+        lfoR.start();
+
+        // Create dry/wet mix controls
+        const dryGain = ctx.createGain();
+        const wetGainL = ctx.createGain();
+        const wetGainR = ctx.createGain();
+
+        dryGain.gain.value = 1 - data.mix;
+        wetGainL.gain.value = data.mix * 0.5;
+        wetGainR.gain.value = data.mix * 0.5;
+
+        // Create stereo panner for width
+        const panLeft = ctx.createStereoPanner();
+        const panRight = ctx.createStereoPanner();
+        panLeft.pan.value = -1;
+        panRight.pan.value = 1;
+
+        // Create input gain for proper leveling
+        const input = ctx.createGain();
+        input.gain.value = 0.7;
+
+        // Create output merger
+        const merger = ctx.createChannelMerger(2);
+
+        // Store all nodes in a container
+        node = {
+          type: "chorus",
+          input,
+          delayL,
+          delayR,
+          lfoL,
+          lfoR,
+          lfoGainL,
+          lfoGainR,
+          dryGain,
+          wetGainL,
+          wetGainR,
+          panLeft,
+          panRight,
+          merger,
+          connect(target) {
+            if (target.input && target.type) {
+              merger.connect(target.input);
+            } else {
+              merger.connect(target);
+            }
+          },
+          disconnect(target) {
+            if (target.input && target.type) {
+              merger.disconnect(target.input);
+            } else {
+              merger.disconnect(target);
+            }
+          },
+        };
+
+        // Set up internal connections
+        input.connect(dryGain);
+        input.connect(delayL);
+        input.connect(delayR);
+
+        delayL.connect(wetGainL);
+        delayR.connect(wetGainR);
+
+        wetGainL.connect(panLeft);
+        wetGainR.connect(panRight);
+
+        dryGain.connect(merger, 0, 0);
+        dryGain.connect(merger, 0, 1);
+        panLeft.connect(merger, 0, 0);
+        panRight.connect(merger, 0, 1);
 
         break;
       }

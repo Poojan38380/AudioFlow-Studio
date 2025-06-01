@@ -7,6 +7,7 @@ import Out from "./nodes/Out";
 import Amp from "./nodes/Amp";
 import Noise from "./nodes/Noise";
 import Flanger from "./nodes/Flanger";
+import Chorus from "./nodes/Chorus";
 
 // Memoized node types
 const nodeTypes = {
@@ -15,6 +16,7 @@ const nodeTypes = {
   out: Out,
   noise: Noise,
   flanger: Flanger,
+  chorus: Chorus,
 };
 
 // Memoized button component with proper prop types
@@ -54,6 +56,10 @@ export default function App() {
     () => store.createNode("flanger"),
     [store]
   );
+  const handleAddChorus = useCallback(
+    () => store.createNode("chorus"),
+    [store]
+  );
 
   // Memoized ReactFlow props
   const flowProps = useMemo(
@@ -81,6 +87,7 @@ export default function App() {
         <AddNodeButton label="Add Amp" onClick={handleAddAmp} />
         <AddNodeButton label="Add Noise" onClick={handleAddNoise} />
         <AddNodeButton label="Add Flanger" onClick={handleAddFlanger} />
+        <AddNodeButton label="Add Chorus" onClick={handleAddChorus} />
       </Panel>
       <Background />
     </ReactFlow>

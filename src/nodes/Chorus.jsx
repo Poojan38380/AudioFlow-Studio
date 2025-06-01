@@ -19,18 +19,21 @@ const createSelector = (id) => (store) => ({
     (e) => store.updateNode(id, { rate: +e.target.value }),
     [store]
   ),
-  setFeedback: useCallback(
-    (e) => store.updateNode(id, { feedback: +e.target.value }),
+  setMix: useCallback(
+    (e) => store.updateNode(id, { mix: +e.target.value }),
     [store]
   ),
 });
 
 // Memoized parameter input component
 const ParamInput = memo(({ label, value, onChange, min, max, step }) => (
-  <label className={tw("flex flex-col px-2 pt-1 pb-2")}>
-    <p className={tw("text-xs font-bold mb-1")}>{label}</p>
+  <label className={tw("flex flex-col px-2 py-1")}>
+    <div className={tw("flex justify-between items-center mb-1")}>
+      <p className={tw("text-xs font-bold")}>{label}</p>
+      <p className={tw("text-xs")}>{value.toFixed(2)}</p>
+    </div>
     <input
-      className="nodrag w-full"
+      className="nodrag"
       type="range"
       min={min}
       max={max}
@@ -39,20 +42,19 @@ const ParamInput = memo(({ label, value, onChange, min, max, step }) => (
       onChange={onChange}
       aria-label={label}
     />
-    <p className={tw("text-right text-xs")}>{value.toFixed(2)}</p>
   </label>
 ));
 
 ParamInput.displayName = "ParamInput";
 
-const Flanger = memo(({ id, data }) => {
-  const { setDelay, setDepth, setRate, setFeedback } = useStore(
+const Chorus = memo(({ id, data }) => {
+  const { setDelay, setDepth, setRate, setMix } = useStore(
     createSelector(id),
     shallow
   );
 
   return (
-    <div className="rounded-md bg-white shadow-xl">
+    <div className={tw("rounded-md bg-white shadow-xl")}>
       <Handle
         className={tw("w-2 h-2")}
         type="target"
@@ -61,18 +63,20 @@ const Flanger = memo(({ id, data }) => {
       />
 
       <p
-        className={tw("rounded-t-md px-2 py-1 bg-amber-600 text-white text-sm")}
+        className={tw(
+          "rounded-t-md px-2 py-1 bg-indigo-500 text-white text-sm"
+        )}
       >
-        Flanger
+        Chorus
       </p>
 
-      <div className={tw("grid grid-cols-2 gap-x-1")}>
+      <div className={tw("py-2")}>
         <ParamInput
           label="Delay (ms)"
           value={data.delay}
           onChange={setDelay}
-          min={0.1}
-          max={15}
+          min={20}
+          max={50}
           step={0.1}
         />
         <ParamInput
@@ -88,21 +92,21 @@ const Flanger = memo(({ id, data }) => {
           value={data.rate}
           onChange={setRate}
           min={0.1}
-          max={10}
+          max={3}
           step={0.1}
         />
         <ParamInput
-          label="Feedback"
-          value={data.feedback}
-          onChange={setFeedback}
+          label="Mix"
+          value={data.mix}
+          onChange={setMix}
           min={0}
-          max={0.9}
+          max={1}
           step={0.01}
         />
       </div>
 
       <Handle
-        className="w-2 h-2"
+        className={tw("w-2 h-2")}
         type="source"
         position="bottom"
         aria-label="Output connection"
@@ -111,6 +115,6 @@ const Flanger = memo(({ id, data }) => {
   );
 });
 
-Flanger.displayName = "Flanger";
+Chorus.displayName = "Chorus";
 
-export default Flanger;
+export default Chorus;
