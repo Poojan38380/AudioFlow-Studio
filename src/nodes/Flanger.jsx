@@ -27,10 +27,15 @@ const createSelector = (id) => (store) => ({
 
 // Memoized parameter input component
 const ParamInput = memo(({ label, value, onChange, min, max, step }) => (
-  <label className={tw("flex flex-col px-2 pt-1 pb-2")}>
-    <p className={tw("text-xs font-bold mb-1")}>{label}</p>
+  <label className={tw("flex flex-col px-3 py-1.5")}>
+    <div className={tw("flex justify-between items-center mb-1.5")}>
+      <p className={tw("text-xs font-medium text-gray-700")}>{label}</p>
+      <p className={tw("text-xs text-gray-600")}>{value.toFixed(2)}</p>
+    </div>
     <input
-      className="nodrag w-full"
+      className={tw(
+        "nodrag w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer hover:bg-gray-300"
+      )}
       type="range"
       min={min}
       max={max}
@@ -39,7 +44,6 @@ const ParamInput = memo(({ label, value, onChange, min, max, step }) => (
       onChange={onChange}
       aria-label={label}
     />
-    <p className={tw("text-right text-xs")}>{value.toFixed(2)}</p>
   </label>
 ));
 
@@ -52,21 +56,28 @@ const Flanger = memo(({ id, data }) => {
   );
 
   return (
-    <div className="rounded-md bg-white shadow-xl">
+    <div
+      className={tw(
+        "rounded-lg bg-white shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100"
+      )}
+    >
       <Handle
-        className={tw("w-2 h-2")}
+        className={tw(
+          "w-3 h-3 bg-blue-500 border-2 border-white rounded-full shadow-sm -top-1.5"
+        )}
         type="target"
         position="top"
         aria-label="Input connection"
       />
 
-      <p
-        className={tw("rounded-t-md px-2 py-1 bg-amber-600 text-white text-sm")}
+      <div
+        style={{ background: "#d97706" }}
+        className={tw("rounded-t-lg px-3 py-2")}
       >
-        Flanger
-      </p>
+        <p className={tw("text-sm font-medium text-white")}>Flanger</p>
+      </div>
 
-      <div className={tw("grid grid-cols-2 gap-x-1")}>
+      <div className={tw("grid grid-cols-2 gap-x-2 py-2")}>
         <ParamInput
           label="Delay (ms)"
           value={data.delay}
@@ -102,7 +113,9 @@ const Flanger = memo(({ id, data }) => {
       </div>
 
       <Handle
-        className="w-2 h-2"
+        className={tw(
+          "w-3 h-3 bg-amber-500 border-2 border-white rounded-full shadow-sm -bottom-1.5"
+        )}
         type="source"
         position="bottom"
         aria-label="Output connection"
