@@ -5,12 +5,16 @@ import { useCallback, memo, useMemo } from "react";
 import Osc from "./nodes/Osc";
 import Out from "./nodes/Out";
 import Amp from "./nodes/Amp";
+import Noise from "./nodes/Noise";
+import Flanger from "./nodes/Flanger";
 
 // Memoized node types
 const nodeTypes = {
   osc: Osc,
   amp: Amp,
   out: Out,
+  noise: Noise,
+  flanger: Flanger,
 };
 
 // Memoized button component with proper prop types
@@ -45,6 +49,11 @@ export default function App() {
   // Memoized event handlers
   const handleAddOsc = useCallback(() => store.createNode("osc"), [store]);
   const handleAddAmp = useCallback(() => store.createNode("amp"), [store]);
+  const handleAddNoise = useCallback(() => store.createNode("noise"), [store]);
+  const handleAddFlanger = useCallback(
+    () => store.createNode("flanger"),
+    [store]
+  );
 
   // Memoized ReactFlow props
   const flowProps = useMemo(
@@ -70,6 +79,8 @@ export default function App() {
       <Panel className="space-x-4" position="top-right">
         <AddNodeButton label="Add Osc" onClick={handleAddOsc} />
         <AddNodeButton label="Add Amp" onClick={handleAddAmp} />
+        <AddNodeButton label="Add Noise" onClick={handleAddNoise} />
+        <AddNodeButton label="Add Flanger" onClick={handleAddFlanger} />
       </Panel>
       <Background />
     </ReactFlow>

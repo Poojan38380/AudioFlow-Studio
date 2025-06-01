@@ -43,6 +43,14 @@ const nodeConfigs = {
     defaultData: { gain: 0.5 },
     defaultPosition: { x: 0, y: 0 },
   },
+  noise: {
+    defaultData: { type: "white", gain: 0.5 },
+    defaultPosition: { x: 0, y: 0 },
+  },
+  flanger: {
+    defaultData: { delay: 5, depth: 0.5, rate: 1, feedback: 0.5 },
+    defaultPosition: { x: 0, y: 0 },
+  },
 };
 
 export const useStore = createWithEqualityFn((set, get) => ({
