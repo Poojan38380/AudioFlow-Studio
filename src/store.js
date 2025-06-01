@@ -71,6 +71,14 @@ const nodeConfigs = {
     defaultData: { zoom: 1 },
     defaultPosition: { x: 0, y: 0 },
   },
+  wavesnapshot: {
+    defaultData: { zoom: 1 },
+    defaultPosition: { x: 0, y: 0 },
+  },
+  out: {
+    defaultData: {},
+    defaultPosition: { x: 0, y: 0 },
+  },
 };
 
 export const useStore = createWithEqualityFn((set, get) => ({
