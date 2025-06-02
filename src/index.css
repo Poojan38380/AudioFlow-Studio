@@ -1,12 +1,107 @@
-@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-html,
-body {
-  margin: 0;
-  font-family: "Poppins", sans-serif;
+@layer base {
+  :root {
+    /* Light theme variables */
+    --color-primary-main: #6366f1;
+    --color-primary-light: #818cf8;
+    --color-primary-dark: #4f46e5;
+    --color-primary-contrast: #ffffff;
+
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f8fafc;
+    --color-background-tertiary: #e2e8f0;
+
+    --color-text-primary: #1e293b;
+    --color-text-secondary: #64748b;
+    --color-text-disabled: #94a3b8;
+
+    --color-nodes-audio: #6366f1;
+    --color-nodes-effect: #f59e0b;
+    --color-nodes-input: #10b981;
+    --color-nodes-output: #ef4444;
+  }
+
+  [data-theme="dark"] {
+    /* Dark theme variables */
+    --color-primary-main: #818cf8;
+    --color-primary-light: #6366f1;
+    --color-primary-dark: #4f46e5;
+    --color-primary-contrast: #ffffff;
+
+    --color-background-primary: #0f172a;
+    --color-background-secondary: #1e293b;
+    --color-background-tertiary: #334155;
+
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #cbd5e1;
+    --color-text-disabled: #64748b;
+
+    --color-nodes-audio: #818cf8;
+    --color-nodes-effect: #fbbf24;
+    --color-nodes-input: #34d399;
+    --color-nodes-output: #f87171;
+  }
 }
 
-#app {
-  width: 100vw;
-  height: 100vh;
+/* Base styles */
+@layer base {
+  html {
+    @apply text-base antialiased;
+  }
+
+  body {
+    @apply font-primary bg-background-primary text-text-primary;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-background-tertiary rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-text-disabled;
+  }
+}
+
+/* React Flow specific styles */
+@layer components {
+  .react-flow__node {
+    @apply font-primary rounded-md border border-background-tertiary shadow-sm bg-background-secondary transition-all duration-200;
+  }
+
+  .react-flow__node:hover {
+    @apply shadow-md;
+  }
+
+  .react-flow__handle {
+    @apply w-1.5 h-1.5 bg-primary-main border border-background-primary transition-all duration-200;
+  }
+
+  .react-flow__handle:hover {
+    @apply scale-150;
+  }
+
+  .react-flow__edge-path {
+    @apply stroke-text-disabled stroke-[1.5] transition-all duration-200;
+  }
+
+  .react-flow__connection-path {
+    @apply stroke-primary-main stroke-[1.5];
+  }
+
+  .react-flow__edge:hover .react-flow__edge-path {
+    @apply stroke-primary-main;
+  }
 }

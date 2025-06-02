@@ -1,165 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import styled from "styled-components";
+import { twMerge } from "tailwind-merge";
 import { useTheme } from "../theme/ThemeContext";
 import { useStore } from "../store";
-
-const MenuContainer = styled.div`
-  position: fixed;
-  bottom: ${({ theme }) => theme.spacing.lg};
-  left: ${({ theme }) => theme.spacing.lg};
-  background: ${({ theme }) => theme.colors.background.secondary};
-  border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  padding: ${({ theme }) => theme.spacing.sm};
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.sm};
-  box-shadow: ${({ theme }) => theme.shadows.md};
-  z-index: ${({ theme }) => theme.zIndex.dropdown};
-  transition: all ${({ theme }) => theme.transitions.default};
-
-  &:hover {
-    box-shadow: ${({ theme }) => theme.shadows.lg};
-  }
-`;
-
-const MenuButton = styled.button`
-  width: 36px;
-  height: 36px;
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
-  background: ${({ theme }) => theme.colors.background.primary};
-  color: ${({ theme }) => theme.colors.text.primary};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.default};
-  position: relative;
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.background.secondary};
-    transform: translateY(-1px);
-    box-shadow: ${({ theme }) => theme.shadows.sm};
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  &::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-${({ theme }) => theme.spacing.xs});
-    padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
-    background: ${({ theme }) => theme.colors.background.secondary};
-    color: ${({ theme }) => theme.colors.text.primary};
-    border-radius: ${({ theme }) => theme.borderRadius.md};
-    font-size: ${({ theme }) => theme.typography.fontSize.sm};
-    font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: all ${({ theme }) => theme.transitions.default};
-    box-shadow: ${({ theme }) => theme.shadows.md};
-    border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
-    z-index: ${({ theme }) => theme.zIndex.tooltip};
-  }
-
-  &:hover::after {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(-${({ theme }) => theme.spacing.md});
-  }
-`;
-
-const Divider = styled.div`
-  width: 1px;
-  background: ${({ theme }) => theme.colors.background.tertiary};
-  margin: 0 ${({ theme }) => theme.spacing.xs};
-`;
-
-const NodeDropdown = styled.div`
-  position: fixed;
-  bottom: calc(${({ theme }) => theme.spacing.lg} + 64px);
-  left: ${({ theme }) => theme.spacing.lg};
-  background: ${({ theme }) => theme.colors.background.secondary};
-  border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  padding: ${({ theme }) => theme.spacing.md};
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md};
-  min-width: 260px;
-  box-shadow: ${({ theme }) => theme.shadows.lg};
-  opacity: ${({ isOpen }) => (isOpen ? 1 : 0)};
-  visibility: ${({ isOpen }) => (isOpen ? "visible" : "hidden")};
-  transition: all ${({ theme }) => theme.transitions.default};
-  pointer-events: ${({ isOpen }) => (isOpen ? "auto" : "none")};
-  z-index: ${({ theme }) => theme.zIndex.dropdown};
-`;
-
-const CategoryLabel = styled.div`
-  font-size: ${({ theme }) => theme.typography.fontSize.sm};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  padding-bottom: ${({ theme }) => theme.spacing.xs};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.background.tertiary};
-  margin-top: ${({ theme }) => theme.spacing.md};
-
-  &:first-child {
-    margin-top: 0;
-  }
-`;
-
-const NodeOption = styled.button`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm};
-  padding: ${({ theme }) => `${theme.spacing.sm} ${theme.spacing.md}`};
-  background: ${({ theme }) => theme.colors.background.primary};
-  border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
-  color: ${({ theme }) => theme.colors.text.primary};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.default};
-  width: 100%;
-  text-align: left;
-  font-size: ${({ theme }) => theme.typography.fontSize.sm};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.background.secondary};
-    transform: translateY(-1px);
-    box-shadow: ${({ theme }) => theme.shadows.sm};
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-`;
-
-const ColorDot = styled.div`
-  width: 10px;
-  height: 10px;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  background: ${({ color, theme }) =>
-    typeof color === "function" ? color({ theme }) : color};
-  border: 1px solid ${({ theme }) => theme.colors.background.tertiary};
-  box-shadow: ${({ theme }) => theme.shadows.sm};
-`;
-
-const NodeOptionsGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xs};
-`;
 
 const SunIcon = () => (
   <svg
@@ -167,6 +9,7 @@ const SunIcon = () => (
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
+    className="w-[18px] h-[18px]"
   >
     <path
       strokeLinecap="round"
@@ -183,6 +26,7 @@ const MoonIcon = () => (
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
+    className="w-[18px] h-[18px]"
   >
     <path
       strokeLinecap="round"
@@ -199,6 +43,7 @@ const PlusIcon = () => (
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
+    className="w-[18px] h-[18px]"
   >
     <path
       strokeLinecap="round"
@@ -215,6 +60,7 @@ const UndoIcon = () => (
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
+    className="w-[18px] h-[18px]"
   >
     <path
       strokeLinecap="round"
@@ -231,6 +77,7 @@ const RedoIcon = () => (
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
+    className="w-[18px] h-[18px]"
   >
     <path
       strokeLinecap="round"
@@ -247,12 +94,13 @@ const TrashIcon = () => (
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
+    className="w-[18px] h-[18px]"
   >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m4-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
     />
   </svg>
 );
@@ -263,12 +111,13 @@ const AudioIcon = () => (
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
+    className="w-[18px] h-[18px]"
   >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+      d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
     />
   </svg>
 );
@@ -279,6 +128,7 @@ const EffectIcon = () => (
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
+    className="w-[18px] h-[18px]"
   >
     <path
       strokeLinecap="round"
@@ -301,12 +151,13 @@ const OutputIcon = () => (
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
+    className="w-[18px] h-[18px]"
   >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828 2.828a9 9 0 001.414 1.414"
+      d="M5 12h14M12 5l7 7-7 7"
     />
   </svg>
 );
@@ -363,59 +214,33 @@ const nodeCategories = {
 };
 
 export const BottomMenu = ({ onAddNode }) => {
-  const { currentTheme, toggleTheme } = useTheme();
+  const { toggleTheme } = useTheme();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const clearCanvas = useStore((state) => state.clearCanvas);
-  const undo = useStore((state) => state.undo);
-  const redo = useStore((state) => state.redo);
-  const canUndo = useStore((state) => state.currentHistoryIndex > 0);
-  const canRedo = useStore(
-    (state) => state.currentHistoryIndex < state.history.length - 1
-  );
-  const menuRef = useRef(null);
   const dropdownRef = useRef(null);
+  const { undo, redo, canUndo, canRedo, clearNodes } = useStore();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        isDropdownOpen &&
-        menuRef.current &&
-        dropdownRef.current &&
-        !menuRef.current.contains(event.target) &&
-        !dropdownRef.current.contains(event.target)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside, true);
-
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside, true);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isDropdownOpen]);
+  }, []);
 
   useEffect(() => {
     const handleKeyboard = (event) => {
-      // Check if the target is an input or textarea
-      if (
-        event.target.tagName === "INPUT" ||
-        event.target.tagName === "TEXTAREA"
-      ) {
-        return;
-      }
-
-      // Handle undo/redo shortcuts
       if (event.metaKey || event.ctrlKey) {
-        if (event.key === "z" && !event.shiftKey && canUndo) {
-          event.preventDefault();
-          undo();
-        } else if (
-          (event.key === "y" || (event.key === "z" && event.shiftKey)) &&
-          canRedo
-        ) {
-          event.preventDefault();
-          redo();
+        if (event.key === "z") {
+          if (event.shiftKey) {
+            redo();
+          } else {
+            undo();
+          }
         }
       }
     };
@@ -424,7 +249,7 @@ export const BottomMenu = ({ onAddNode }) => {
     return () => {
       document.removeEventListener("keydown", handleKeyboard);
     };
-  }, [undo, redo, canUndo, canRedo]);
+  }, [undo, redo]);
 
   const handleAddNode = (type) => {
     onAddNode(type);
@@ -433,63 +258,157 @@ export const BottomMenu = ({ onAddNode }) => {
 
   return (
     <>
-      <MenuContainer ref={menuRef}>
-        <MenuButton
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsDropdownOpen(!isDropdownOpen);
-          }}
-          data-tooltip="Add Node"
+      <div className="fixed bottom-lg left-lg bg-background-secondary border border-background-tertiary rounded-lg p-sm flex gap-sm shadow-md z-dropdown transition-all duration-200 hover:shadow-lg">
+        <button
+          className="w-9 h-9 rounded-md border border-background-tertiary bg-background-primary text-text-primary flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-background-secondary hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 group relative"
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          data-tooltip="Add Node (A)"
         >
           <PlusIcon />
-        </MenuButton>
-        <Divider />
-        <MenuButton
+          <span className="absolute bottom-full left-1/2 -translate-x-1/2 -translate-y-xs px-sm py-xs bg-background-secondary text-text-primary rounded-md text-sm font-medium whitespace-nowrap opacity-0 invisible transition-all duration-200 shadow-md border border-background-tertiary z-tooltip group-hover:opacity-100 group-hover:visible group-hover:-translate-y-md">
+            Add Node (A)
+          </span>
+        </button>
+
+        <div className="w-px bg-background-tertiary mx-xs" />
+
+        <button
+          className={twMerge(
+            "w-9 h-9 rounded-md border border-background-tertiary bg-background-primary text-text-primary flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-background-secondary hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 group relative",
+            !canUndo && "opacity-50 cursor-not-allowed hover:transform-none"
+          )}
           onClick={undo}
           disabled={!canUndo}
-          data-tooltip="Undo (Ctrl/⌘+Z)"
-          style={{ opacity: canUndo ? 1 : 0.5 }}
+          data-tooltip="Undo (⌘Z)"
         >
           <UndoIcon />
-        </MenuButton>
-        <MenuButton
+          <span className="absolute bottom-full left-1/2 -translate-x-1/2 -translate-y-xs px-sm py-xs bg-background-secondary text-text-primary rounded-md text-sm font-medium whitespace-nowrap opacity-0 invisible transition-all duration-200 shadow-md border border-background-tertiary z-tooltip group-hover:opacity-100 group-hover:visible group-hover:-translate-y-md">
+            Undo (⌘Z)
+          </span>
+        </button>
+
+        <button
+          className={twMerge(
+            "w-9 h-9 rounded-md border border-background-tertiary bg-background-primary text-text-primary flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-background-secondary hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 group relative",
+            !canRedo && "opacity-50 cursor-not-allowed hover:transform-none"
+          )}
           onClick={redo}
           disabled={!canRedo}
-          data-tooltip="Redo (Ctrl/⌘+Y)"
-          style={{ opacity: canRedo ? 1 : 0.5 }}
+          data-tooltip="Redo (⌘⇧Z)"
         >
           <RedoIcon />
-        </MenuButton>
-        <Divider />
-        <MenuButton onClick={toggleTheme} data-tooltip="Toggle Theme">
-          {currentTheme === "light" ? <MoonIcon /> : <SunIcon />}
-        </MenuButton>
-        <Divider />
-        <MenuButton onClick={clearCanvas} data-tooltip="Clear Canvas">
+          <span className="absolute bottom-full left-1/2 -translate-x-1/2 -translate-y-xs px-sm py-xs bg-background-secondary text-text-primary rounded-md text-sm font-medium whitespace-nowrap opacity-0 invisible transition-all duration-200 shadow-md border border-background-tertiary z-tooltip group-hover:opacity-100 group-hover:visible group-hover:-translate-y-md">
+            Redo (⌘⇧Z)
+          </span>
+        </button>
+
+        <div className="w-px bg-background-tertiary mx-xs" />
+
+        <button
+          className="w-9 h-9 rounded-md border border-background-tertiary bg-background-primary text-text-primary flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-background-secondary hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 group relative"
+          onClick={toggleTheme}
+          data-tooltip="Toggle Theme (T)"
+        >
+          <SunIcon />
+          <span className="absolute bottom-full left-1/2 -translate-x-1/2 -translate-y-xs px-sm py-xs bg-background-secondary text-text-primary rounded-md text-sm font-medium whitespace-nowrap opacity-0 invisible transition-all duration-200 shadow-md border border-background-tertiary z-tooltip group-hover:opacity-100 group-hover:visible group-hover:-translate-y-md">
+            Toggle Theme (T)
+          </span>
+        </button>
+
+        <button
+          className="w-9 h-9 rounded-md border border-background-tertiary bg-background-primary text-text-primary flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-background-secondary hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 group relative"
+          onClick={clearNodes}
+          data-tooltip="Clear All"
+        >
           <TrashIcon />
-        </MenuButton>
-      </MenuContainer>
-      <NodeDropdown isOpen={isDropdownOpen} ref={dropdownRef}>
-        {Object.entries(nodeCategories).map(([category, nodes]) => (
-          <div key={category}>
-            <CategoryLabel>{category}</CategoryLabel>
-            <NodeOptionsGroup>
-              {nodes.map(({ type, label, color }) => (
-                <NodeOption
-                  key={type}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddNode(type);
-                  }}
-                >
-                  <ColorDot color={color} />
-                  {label}
-                </NodeOption>
-              ))}
-            </NodeOptionsGroup>
+          <span className="absolute bottom-full left-1/2 -translate-x-1/2 -translate-y-xs px-sm py-xs bg-background-secondary text-text-primary rounded-md text-sm font-medium whitespace-nowrap opacity-0 invisible transition-all duration-200 shadow-md border border-background-tertiary z-tooltip group-hover:opacity-100 group-hover:visible group-hover:-translate-y-md">
+            Clear All
+          </span>
+        </button>
+      </div>
+
+      <div
+        ref={dropdownRef}
+        className={twMerge(
+          "fixed bottom-[calc(theme(spacing.lg)+64px)] left-lg bg-background-secondary border border-background-tertiary rounded-lg p-md flex flex-col gap-md min-w-[260px] shadow-lg transition-all duration-200 z-dropdown",
+          isDropdownOpen
+            ? "opacity-100 visible pointer-events-auto"
+            : "opacity-0 invisible pointer-events-none"
+        )}
+      >
+        <div>
+          <div className="text-sm font-semibold text-text-secondary pb-xs border-b border-background-tertiary">
+            Audio Sources
           </div>
-        ))}
-      </NodeDropdown>
+          <div className="flex flex-col gap-xs mt-md">
+            <button
+              className="flex items-center gap-sm px-md py-sm bg-background-primary border border-background-tertiary text-text-primary rounded-md cursor-pointer transition-all duration-200 hover:bg-background-secondary hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 text-sm font-medium text-left w-full"
+              onClick={() => handleAddNode("osc")}
+            >
+              <div className="w-2.5 h-2.5 rounded-full bg-nodes-audio border border-background-tertiary shadow-sm" />
+              Oscillator
+            </button>
+            <button
+              className="flex items-center gap-sm px-md py-sm bg-background-primary border border-background-tertiary text-text-primary rounded-md cursor-pointer transition-all duration-200 hover:bg-background-secondary hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 text-sm font-medium text-left w-full"
+              onClick={() => handleAddNode("noise")}
+            >
+              <div className="w-2.5 h-2.5 rounded-full bg-nodes-audio border border-background-tertiary shadow-sm" />
+              Noise
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div className="text-sm font-semibold text-text-secondary pb-xs border-b border-background-tertiary">
+            Effects
+          </div>
+          <div className="flex flex-col gap-xs mt-md">
+            <button
+              className="flex items-center gap-sm px-md py-sm bg-background-primary border border-background-tertiary text-text-primary rounded-md cursor-pointer transition-all duration-200 hover:bg-background-secondary hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 text-sm font-medium text-left w-full"
+              onClick={() => handleAddNode("amp")}
+            >
+              <div className="w-2.5 h-2.5 rounded-full bg-nodes-effect border border-background-tertiary shadow-sm" />
+              Amplifier
+            </button>
+            <button
+              className="flex items-center gap-sm px-md py-sm bg-background-primary border border-background-tertiary text-text-primary rounded-md cursor-pointer transition-all duration-200 hover:bg-background-secondary hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 text-sm font-medium text-left w-full"
+              onClick={() => handleAddNode("flanger")}
+            >
+              <div className="w-2.5 h-2.5 rounded-full bg-nodes-effect border border-background-tertiary shadow-sm" />
+              Flanger
+            </button>
+            <button
+              className="flex items-center gap-sm px-md py-sm bg-background-primary border border-background-tertiary text-text-primary rounded-md cursor-pointer transition-all duration-200 hover:bg-background-secondary hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 text-sm font-medium text-left w-full"
+              onClick={() => handleAddNode("chorus")}
+            >
+              <div className="w-2.5 h-2.5 rounded-full bg-nodes-effect border border-background-tertiary shadow-sm" />
+              Chorus
+            </button>
+            <button
+              className="flex items-center gap-sm px-md py-sm bg-background-primary border border-background-tertiary text-text-primary rounded-md cursor-pointer transition-all duration-200 hover:bg-background-secondary hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 text-sm font-medium text-left w-full"
+              onClick={() => handleAddNode("phaser")}
+            >
+              <div className="w-2.5 h-2.5 rounded-full bg-nodes-effect border border-background-tertiary shadow-sm" />
+              Phaser
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div className="text-sm font-semibold text-text-secondary pb-xs border-b border-background-tertiary">
+            Output
+          </div>
+          <div className="flex flex-col gap-xs mt-md">
+            <button
+              className="flex items-center gap-sm px-md py-sm bg-background-primary border border-background-tertiary text-text-primary rounded-md cursor-pointer transition-all duration-200 hover:bg-background-secondary hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 text-sm font-medium text-left w-full"
+              onClick={() => handleAddNode("out")}
+            >
+              <div className="w-2.5 h-2.5 rounded-full bg-nodes-output border border-background-tertiary shadow-sm" />
+              Output
+            </button>
+          </div>
+        </div>
+      </div>
     </>
   );
 };
