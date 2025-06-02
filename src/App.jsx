@@ -72,10 +72,16 @@ export default function App() {
   );
 
   return (
-    <>
+    <div className="w-full h-full bg-background-primary transition-colors duration-200">
       <ReactFlow {...flowProps}>
-        <Background />
+        <Background
+          gap={[25, 25]}
+          size={1}
+          color="currentColor"
+          className="text-background-tertiary/20"
+          variant="dots"
+        />
       </ReactFlow>
-    </>
+    </div>
   );
 }

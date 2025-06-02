@@ -67,6 +67,36 @@ export default {
         dropdown: "1000",
         tooltip: "1100",
       },
+      transitionDuration: {
+        DEFAULT: "200ms",
+      },
+      fontWeight: {
+        normal: "400",
+        medium: "500",
+        semibold: "600",
+        bold: "700",
+      },
+      lineHeight: {
+        none: "1",
+        tight: "1.25",
+        normal: "1.5",
+        relaxed: "1.75",
+      },
+      safelist: [
+        {
+          pattern:
+            /^(bg|text|border|from|to)-(primary|background|text|nodes)-(main|light|dark|contrast|primary|secondary|tertiary|disabled|audio|effect|input|output)/,
+        },
+        {
+          pattern: /^(gap|grid-cols)-\d+/,
+        },
+        {
+          pattern: /^(items|justify|flex|grid)-/,
+        },
+        {
+          pattern: /^(text|font|leading)-/,
+        },
+      ],
     },
   },
   plugins: [],

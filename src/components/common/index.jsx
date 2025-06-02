@@ -172,7 +172,7 @@ export const Text = React.forwardRef(
       children,
       variant = "primary",
       size = "md",
-      weight = "regular",
+      weight = "normal",
       lineHeight = "normal",
       className,
       ...props
@@ -203,30 +203,32 @@ export const BaseNode = React.forwardRef(
       switch (type) {
         case "osc":
         case "noise":
-          return "bg-gradient-to-br from-nodes-audio/10 to-transparent border-nodes-audio";
+          return "bg-gradient-to-br from-nodes-audio/30 to-background-secondary border-nodes-audio hover:from-nodes-audio/40 hover:border-nodes-audio";
         case "amp":
         case "flanger":
         case "chorus":
         case "phaser":
-          return "bg-gradient-to-br from-nodes-effect/10 to-transparent border-nodes-effect";
+          return "bg-gradient-to-br from-nodes-effect/30 to-background-secondary border-nodes-effect hover:from-nodes-effect/40 hover:border-nodes-effect";
         case "waveform":
-          return "bg-gradient-to-br from-nodes-input/10 to-transparent border-nodes-input";
+          return "bg-gradient-to-br from-nodes-input/30 to-background-secondary border-nodes-input hover:from-nodes-input/40 hover:border-nodes-input";
         case "out":
-          return "bg-gradient-to-br from-nodes-output/10 to-transparent border-nodes-output";
+          return "bg-gradient-to-br from-nodes-output/30 to-background-secondary border-nodes-output hover:from-nodes-output/40 hover:border-nodes-output";
         default:
-          return "bg-background-secondary border-background-tertiary";
+          return "bg-background-secondary border-background-tertiary hover:border-primary-main";
       }
     };
 
     const classes = twMerge(
-      'rounded-md p-md min-w-[220px] shadow-sm transition-all duration-200 border relative before:content-[""] before:absolute before:-inset-2 before:-z-10',
+      "rounded-lg p-md min-w-[220px] shadow-lg transition-all duration-200 border backdrop-blur-sm relative hover:shadow-xl hover:-translate-y-0.5",
       getNodeColors(),
       className
     );
 
     return (
       <div ref={ref} className={classes} {...props}>
-        {children}
+        <div className="node-header" data-type={type}>
+          {children}
+        </div>
       </div>
     );
   }
