@@ -5,15 +5,15 @@ export default {
     extend: {
       colors: {
         primary: {
-          main: "var(--color-primary-main)",
-          light: "var(--color-primary-light)",
-          dark: "var(--color-primary-dark)",
-          contrast: "var(--color-primary-contrast)",
+          main: "rgb(var(--color-primary-main) / <alpha-value>)",
+          light: "rgb(var(--color-primary-light) / <alpha-value>)",
+          dark: "rgb(var(--color-primary-dark) / <alpha-value>)",
+          contrast: "rgb(var(--color-primary-contrast) / <alpha-value>)",
         },
         background: {
-          primary: "var(--color-background-primary)",
-          secondary: "var(--color-background-secondary)",
-          tertiary: "var(--color-background-tertiary)",
+          primary: "rgb(var(--color-background-primary) / <alpha-value>)",
+          secondary: "rgb(var(--color-background-secondary) / <alpha-value>)",
+          tertiary: "rgb(var(--color-background-tertiary) / <alpha-value>)",
         },
         text: {
           primary: "var(--color-text-primary)",

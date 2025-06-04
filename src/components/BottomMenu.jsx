@@ -162,57 +162,6 @@ const OutputIcon = () => (
   </svg>
 );
 
-const nodeCategories = {
-  Sources: [
-    {
-      type: "osc",
-      label: "Oscillator",
-      color: ({ theme }) => theme.colors.nodes.audio,
-    },
-    {
-      type: "noise",
-      label: "Noise",
-      color: ({ theme }) => theme.colors.nodes.audio,
-    },
-  ],
-  Effects: [
-    {
-      type: "amp",
-      label: "Amplifier",
-      color: ({ theme }) => theme.colors.nodes.effect,
-    },
-    {
-      type: "flanger",
-      label: "Flanger",
-      color: ({ theme }) => theme.colors.nodes.effect,
-    },
-    {
-      type: "chorus",
-      label: "Chorus",
-      color: ({ theme }) => theme.colors.nodes.effect,
-    },
-    {
-      type: "phaser",
-      label: "Phaser",
-      color: ({ theme }) => theme.colors.nodes.effect,
-    },
-  ],
-  Analysis: [
-    {
-      type: "waveform",
-      label: "Waveform",
-      color: ({ theme }) => theme.colors.nodes.input,
-    },
-  ],
-  Output: [
-    {
-      type: "out",
-      label: "Output",
-      color: ({ theme }) => theme.colors.nodes.output,
-    },
-  ],
-};
-
 export const BottomMenu = ({ onAddNode }) => {
   const { toggleTheme } = useTheme();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -390,6 +339,21 @@ export const BottomMenu = ({ onAddNode }) => {
             >
               <div className="w-2.5 h-2.5 rounded-full bg-nodes-effect border border-background-tertiary shadow-sm" />
               Phaser
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div className="text-sm font-semibold text-text-secondary pb-xs border-b border-background-tertiary">
+            Analysis
+          </div>
+          <div className="flex flex-col gap-xs mt-md">
+            <button
+              className="flex items-center gap-sm px-md py-sm bg-background-primary border border-background-tertiary text-text-primary rounded-md cursor-pointer transition-all duration-200 hover:bg-background-secondary hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 text-sm font-medium text-left w-full"
+              onClick={() => handleAddNode("waveform")}
+            >
+              <div className="w-2.5 h-2.5 rounded-full bg-nodes-input border border-background-tertiary shadow-sm" />
+              Waveform
             </button>
           </div>
         </div>
